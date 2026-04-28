@@ -610,6 +610,21 @@ function f() {
 	{`BEGIN { print match("x food y", "fox"), RSTART, RLENGTH }`, "", "0 0 -1\n", "", ""},
 	{`BEGIN { print match("x food y", /[fod]+/), RSTART, RLENGTH }`, "", "3 3 4\n", "", ""},
 	{`BEGIN { print match("a\nb\nc", /^a.*c$/), RSTART, RLENGTH }`, "", "1 1 5\n", "", ""},
+	{`
+BEGIN { 
+	print match("xfoooobazbarrrrrx", /(fo+).+(bar*)/, a), RSTART, RLENGTH
+	print length(a)
+	print a[0], a[1], a[2]
+	print a[0, "start"], a[0, "length"]
+	print a[1, "start"], a[1, "length"]
+	print a[2, "start"], a[2, "length"]
+}  # !posix`, "", `2 2 15
+9
+foooobazbarrrrr foooo barrrrr
+2 15
+2 5
+10 7
+`, "", ""},
 	{`{ print length, length(), length("buzz"), length("") }`, "foo bar", "7 7 4 0\n", "", ""},
 	{`{ a[$0]++ } END { print length(a) }  # !posix`, "a\nc\nb\na\na\nb", "3\n", "", ""},
 	{`BEGIN { 1 in a; print length(a); a[1]; a[2]=2; a[2]=3; print length(a) }  # !gawk !posix`, "", "0\n2\n", "", ""},
