@@ -133,6 +133,7 @@ $0 {
     split(s, a)
     split(s, a, regex)
     match(s, regex)
+    match(s, regex, arr)
     rand()
     srand()
     srand(1)

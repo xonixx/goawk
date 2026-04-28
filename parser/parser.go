@@ -863,8 +863,18 @@ func (p *parser) primary() ast.Expr {
 		str := p.expr()
 		p.commaNewlines()
 		regex := p.regexStr(p.expr)
+		args := []ast.Expr{str, regex}
+		if p.tok == lexer.COMMA {
+			p.commaNewlines()
+			inPos := p.pos
+			in := p.expr()
+			if !ast.IsLValue(in) {
+				panic(ast.PosErrorf(inPos, "3rd arg to match must be lvalue"))
+			}
+			args = append(args, in)
+		}
 		p.expect(lexer.RPAREN)
-		return &ast.CallExpr{Func: lexer.F_MATCH, Args: []ast.Expr{str, regex}}
+		return &ast.CallExpr{Func: lexer.F_MATCH, Args: args}
 	case lexer.F_RAND:
 		p.next()
 		p.expect(lexer.LPAREN)
