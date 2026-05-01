@@ -252,13 +252,25 @@ func (p *interp) matchArray(s string, regex string, scope resolver.Scope, index 
 	if groups == nil {
 		p.matchStart = num(0)
 		p.matchLength = num(-1)
+
+		p.arrays[p.arrayIndex(scope, index)] = map[string]value{}
 		return 0, nil
 	}
 	groupsArr := map[string]value{}
 	if p.chars {
-		// TODO
 		p.matchStart = num(float64(utf8.RuneCountInString(s[:groups[0]]) + 1))
 		p.matchLength = num(float64(utf8.RuneCountInString(s[groups[0]:groups[1]])))
+
+		groupsArr["0"] = str(s[groups[0]:groups[1]])
+		groupsArr["0"+p.subscriptSep+"start"] = p.matchStart
+		groupsArr["0"+p.subscriptSep+"length"] = p.matchLength
+
+		for i := 2; i < len(groups); i += 2 {
+			idx := i / 2
+			groupsArr[strconv.Itoa(idx)] = str(s[groups[i]:groups[i+1]])
+			groupsArr[strconv.Itoa(idx)+p.subscriptSep+"start"] = num(float64(utf8.RuneCountInString(s[:groups[i]]) + 1))
+			groupsArr[strconv.Itoa(idx)+p.subscriptSep+"length"] = num(float64(utf8.RuneCountInString(s[groups[i]:groups[i+1]])))
+		}
 	} else {
 		p.matchStart = num(float64(groups[0] + 1))
 		p.matchLength = num(float64(groups[1] - groups[0]))
@@ -274,6 +286,7 @@ func (p *interp) matchArray(s string, regex string, scope resolver.Scope, index 
 			groupsArr[strconv.Itoa(idx)+p.subscriptSep+"length"] = num(float64(groups[i+1] - groups[i]))
 		}
 	}
+
 	p.arrays[p.arrayIndex(scope, index)] = groupsArr
 	return groups[0] + 1, nil
 }
