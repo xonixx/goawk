@@ -121,6 +121,7 @@ const (
 	CallSplit       // arrayScope arrayIndex
 	CallSplitSep    // arrayScope arrayIndex sepIsRegex
 	CallSprintf     // numArgs
+	CallMatchArray  // arrayScope arrayIndex
 
 	// User and native functions
 	CallUser   // funcIndex numArrayArgs [arrayScope1 arrayIndex1 ...]

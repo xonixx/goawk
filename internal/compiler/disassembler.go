@@ -333,6 +333,11 @@ func (d *disassembler) disassemble(prefix string) error {
 			arrayIndex := int(d.fetch())
 			d.writeOpf("CallLengthArray %s", d.arrayName(arrayScope, arrayIndex))
 
+		case CallMatchArray:
+			arrayScope := resolver.Scope(d.fetch())
+			arrayIndex := int(d.fetch())
+			d.writeOpf("CallMatchArray %s", d.arrayName(arrayScope, arrayIndex))
+
 		case CallSplit:
 			arrayScope := resolver.Scope(d.fetch())
 			arrayIndex := int(d.fetch())

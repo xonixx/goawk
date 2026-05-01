@@ -812,6 +812,17 @@ func (c *compiler) expr(expr ast.Expr) {
 				c.add(CallSplit, Opcode(scope), opcodeInt(index))
 			}
 			return
+		case lexer.F_MATCH: // match optional 3rd arg is an array
+			c.expr(e.Args[0])
+			c.expr(e.Args[1])
+			if len(e.Args) > 2 {
+				varExpr := e.Args[2].(*ast.VarExpr)
+				scope, index := c.arrayInfo(varExpr.Name)
+				c.add(CallMatchArray, Opcode(scope), opcodeInt(index))
+			} else {
+				c.add(CallBuiltin, Opcode(BuiltinMatch))
+			}
+			return
 		case lexer.F_SUB, lexer.F_GSUB:
 			op := BuiltinSub
 			if e.Func == lexer.F_GSUB {
@@ -886,8 +897,6 @@ func (c *compiler) expr(expr ast.Expr) {
 			c.add(CallBuiltin, Opcode(BuiltinInt))
 		case lexer.F_LOG:
 			c.add(CallBuiltin, Opcode(BuiltinLog))
-		case lexer.F_MATCH:
-			c.add(CallBuiltin, Opcode(BuiltinMatch))
 		case lexer.F_RAND:
 			c.add(CallBuiltin, Opcode(BuiltinRand))
 		case lexer.F_SIN:

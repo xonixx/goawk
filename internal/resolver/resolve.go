@@ -443,6 +443,14 @@ func (v *mainVisitor) Visit(node ast.Node) ast.Visitor {
 			v.r.recordVar(v.curFunc, varExpr.Name, Array, varExpr.Pos)
 			ast.WalkExprList(v, n.Args[2:])
 
+		case lexer.F_MATCH:
+			ast.Walk(v, n.Args[0])
+			ast.Walk(v, n.Args[1])
+			if len(n.Args) > 2 {
+				varExpr := n.Args[2].(*ast.VarExpr) // 3rd arg is array if present
+				v.r.recordVar(v.curFunc, varExpr.Name, Array, varExpr.Pos)
+			}
+
 		case lexer.F_LENGTH:
 			if len(n.Args) > 0 {
 				if varExpr, ok := n.Args[0].(*ast.VarExpr); ok {
