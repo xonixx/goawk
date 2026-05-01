@@ -664,6 +664,19 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			array := p.array(resolver.Scope(arrayScope), int(arrayIndex))
 			p.push(num(float64(len(array))))
 
+		case compiler.CallMatchArray:
+			arrayScope := code[ip]
+			arrayIndex := code[ip+1]
+			ip += 2
+			sValue, regex := p.peekPop()
+			n, err := p.matchArray(
+				p.toString(sValue), p.toString(regex),
+				resolver.Scope(arrayScope), int(arrayIndex))
+			if err != nil {
+				return err
+			}
+			p.replaceTop(num(float64(n)))
+
 		case compiler.CallSplit:
 			arrayScope := code[ip]
 			arrayIndex := code[ip+1]

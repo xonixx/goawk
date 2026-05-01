@@ -242,6 +242,41 @@ func validNativeType(typ reflect.Type) bool {
 	}
 }
 
+// Guts of the match() function (with 3rd array)
+func (p *interp) matchArray(s string, regex string, scope resolver.Scope, index int) (int, error) {
+	re, err := p.compileRegex(regex)
+	if err != nil {
+		return 0, err
+	}
+	groups := re.FindStringSubmatchIndex(s)
+	if groups == nil {
+		p.matchStart = num(0)
+		p.matchLength = num(-1)
+		return 0, nil
+	}
+	groupsArr := map[string]value{}
+	if p.chars {
+		// TODO
+		p.matchStart = num(float64(utf8.RuneCountInString(s[:groups[0]]) + 1))
+		p.matchLength = num(float64(utf8.RuneCountInString(s[groups[0]:groups[1]])))
+	} else {
+		p.matchStart = num(float64(groups[0] + 1))
+		p.matchLength = num(float64(groups[1] - groups[0]))
+
+		groupsArr["0"] = str(s[groups[0]:groups[1]])
+		groupsArr["0"+p.subscriptSep+"start"] = p.matchStart
+		groupsArr["0"+p.subscriptSep+"length"] = p.matchLength
+
+		for i := 2; i < len(groups); i += 2 {
+			groupsArr[strconv.Itoa(i+1)] = str(s[groups[i]:groups[i+1]])
+			groupsArr[strconv.Itoa(i+1)+p.subscriptSep+"start"] = num(float64(groups[i] + 1))
+			groupsArr[strconv.Itoa(i+1)+p.subscriptSep+"length"] = num(float64(groups[i+1] - groups[i]))
+		}
+	}
+	p.arrays[p.arrayIndex(scope, index)] = groupsArr
+	return groups[0] + 1, nil
+}
+
 // Guts of the split() function
 func (p *interp) split(s string, scope resolver.Scope, index int, sep string, sepIsRegex bool, mode IOMode) (int, error) {
 	var parts []string
