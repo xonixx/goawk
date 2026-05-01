@@ -268,9 +268,10 @@ func (p *interp) matchArray(s string, regex string, scope resolver.Scope, index 
 		groupsArr["0"+p.subscriptSep+"length"] = p.matchLength
 
 		for i := 2; i < len(groups); i += 2 {
-			groupsArr[strconv.Itoa(i+1)] = str(s[groups[i]:groups[i+1]])
-			groupsArr[strconv.Itoa(i+1)+p.subscriptSep+"start"] = num(float64(groups[i] + 1))
-			groupsArr[strconv.Itoa(i+1)+p.subscriptSep+"length"] = num(float64(groups[i+1] - groups[i]))
+			idx := i / 2
+			groupsArr[strconv.Itoa(idx)] = str(s[groups[i]:groups[i+1]])
+			groupsArr[strconv.Itoa(idx)+p.subscriptSep+"start"] = num(float64(groups[i] + 1))
+			groupsArr[strconv.Itoa(idx)+p.subscriptSep+"length"] = num(float64(groups[i+1] - groups[i]))
 		}
 	}
 	p.arrays[p.arrayIndex(scope, index)] = groupsArr
