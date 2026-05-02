@@ -1651,6 +1651,7 @@ func TestCharsMode(t *testing.T) {
 
 		// match()
 		{`BEGIN { print match("絵 fööd y", /[föd]+/), RSTART, RLENGTH }`, "", "3 3 4\n"},
+		{`BEGIN { match("☹☺",/☺/,a); print a[0,"start"],a[0,"length"],a[0] }`, "", "2 1 ☺\n"}, // same as gawk
 
 		// substr()
 		{`BEGIN { print substr("food", 1), substr("fööd", 1) }`, "", "food fööd\n"},
