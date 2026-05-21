@@ -683,7 +683,7 @@ func (p *parser) _compare(ops ...lexer.Token) ast.Expr {
 
 func (p *parser) concat() ast.Expr {
 	expr := p.add()
-	for p.matches(lexer.DOLLAR, lexer.AT, lexer.NOT, lexer.NAME, lexer.NUMBER, lexer.STRING, lexer.LPAREN, lexer.INCR, lexer.DECR) ||
+	for p.matches(lexer.DOLLAR, lexer.AT, lexer.NOT, lexer.NAME, lexer.NUMBER, lexer.NUMBER_I64, lexer.STRING, lexer.LPAREN, lexer.INCR, lexer.DECR) ||
 		p.tok >= lexer.FIRST_FUNC && p.tok <= lexer.LAST_FUNC {
 		right := p.add()
 		expr = &ast.BinaryExpr{Left: expr, Op: lexer.CONCAT, Right: right}
@@ -730,7 +730,7 @@ func (p *parser) primary() ast.Expr {
 		return &ast.GetlineExpr{Command: left, Target: target}
 	}
 	switch p.tok {
-	case lexer.NUMBER:
+	case lexer.NUMBER, lexer.NUMBER_I64: // TODO create NumI64Expr
 		// AWK allows forms like "1.5e", but ParseFloat doesn't
 		s := strings.TrimRight(p.val, "eE")
 		n, _ := strconv.ParseFloat(s, 64)

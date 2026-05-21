@@ -16,6 +16,7 @@ const (
 	typeStr
 	typeNum
 	typeNumStr
+	typeNumI64
 )
 
 // An AWK value (these are passed around by value)
@@ -23,6 +24,7 @@ type value struct {
 	typ valueType // Type of value
 	s   string    // String value (for typeStr and typeNumStr)
 	n   float64   // Numeric value (for typeNum)
+	l   int64     // Numeric integer value (for typeNumI64)
 }
 
 // Create a new null value
@@ -33,6 +35,11 @@ func null() value {
 // Create a new number value
 func num(n float64) value {
 	return value{typ: typeNum, n: n}
+}
+
+// Create a new int64 value
+func numI64(l int64) value {
+	return value{typ: typeNumI64, l: l}
 }
 
 // Create a new string value
@@ -62,6 +69,8 @@ func (v value) String() string {
 		return fmt.Sprintf("num(%s)", v.str("%.6g"))
 	case typeNumStr:
 		return fmt.Sprintf("numStr(%q)", v.s)
+	case typeNumI64:
+		return fmt.Sprintf("numI64(%d)", v.l)
 	default:
 		return "null()"
 	}
@@ -80,6 +89,8 @@ func (v value) isTrueStr() (float64, bool) {
 			return 0, true
 		}
 		return f, false
+	case typeNumI64:
+		panic("isTrueStr not implemented for typeNumI64") // TODO
 	default: // typeNum, typeNull
 		return v.n, false
 	}
@@ -98,6 +109,8 @@ func (v value) boolean() bool {
 			return v.s != ""
 		}
 		return f != 0
+	case typeNumI64:
+		return v.l != 0
 	default: // typeNum, typeNull
 		return v.n != 0
 	}
@@ -149,6 +162,8 @@ func (v value) str(floatFormat string) string {
 			}
 			return fmt.Sprintf(floatFormat, v.n)
 		}
+	} else if v.typ == typeNumI64 {
+		return strconv.FormatInt(v.l, 10)
 	}
 	// For typeStr and typeNumStr we already have the string, for
 	// typeNull v.s == "".
@@ -156,13 +171,23 @@ func (v value) str(floatFormat string) string {
 }
 
 // Return value's number value, converting from string if necessary
-func (v value) num() float64 {
+func (v value) num() float64 { // TODO typeNumI64
 	switch v.typ {
 	case typeStr, typeNumStr:
 		// Ensure string starts with a float and convert it
 		return parseFloatPrefix(v.s)
 	default: // typeNum, typeNull
 		return v.n
+	}
+}
+
+// Return value's int64 number value, converting from string if necessary
+func (v value) numI64() int64 {
+	switch v.typ {
+	case typeNumI64:
+		return v.l
+	default: // typeNum, typeNull
+		return int64(v.num())
 	}
 }
 

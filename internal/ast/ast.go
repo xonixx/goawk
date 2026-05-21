@@ -90,6 +90,7 @@ func (e *BinaryExpr) node()     {}
 func (e *InExpr) node()         {}
 func (e *CondExpr) node()       {}
 func (e *NumExpr) node()        {}
+func (e *NumI64Expr) node()     {}
 func (e *StrExpr) node()        {}
 func (e *RegExpr) node()        {}
 func (e *VarExpr) node()        {}
@@ -154,6 +155,7 @@ func (e *UnaryExpr) precedence() int      { return precUnary }
 func (e *InExpr) precedence() int         { return precIn }
 func (e *CondExpr) precedence() int       { return precCond }
 func (e *NumExpr) precedence() int        { return precPrimary }
+func (e *NumI64Expr) precedence() int     { return precPrimary }
 func (e *StrExpr) precedence() int        { return precPrimary }
 func (e *RegExpr) precedence() int        { return precPrimary }
 func (e *VarExpr) precedence() int        { return precPrimary }
@@ -279,7 +281,7 @@ func (e *CondExpr) String() string {
 	return parenthesize(e.Cond, e) + " ? " + parenthesize(e.True, e) + " : " + parenthesize(e.False, e)
 }
 
-// NumExpr is a literal number like 1234.
+// NumExpr is a literal number like 123.4.
 type NumExpr struct {
 	Value float64
 }
@@ -290,6 +292,15 @@ func (e *NumExpr) String() string {
 	} else {
 		return fmt.Sprintf("%.6g", e.Value)
 	}
+}
+
+// NumI64Expr is a literal int number like 1234.
+type NumI64Expr struct {
+	Value int64
+}
+
+func (e *NumI64Expr) String() string {
+	return strconv.FormatInt(e.Value, 10)
 }
 
 // StrExpr is a literal string like "foo" or a regex constant like /foo/.
