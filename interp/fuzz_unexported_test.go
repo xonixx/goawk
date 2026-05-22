@@ -48,11 +48,11 @@ func FuzzParseFloatPrefix(f *testing.F) {
 	f.Add("INF")
 
 	f.Fuzz(func(t *testing.T, in string) {
-		nPrefix := parseFloatPrefix(in)
-		if nPrefix != 0 {
+		nPrefix := parseNumberPrefix(in)
+		if nPrefix.toFloat() != 0 {
 			for i := 1; i <= len(in); i++ {
 				n, _ := parseFloatHelper(in[:i])
-				if n == nPrefix || math.IsNaN(n) && math.IsNaN(nPrefix) {
+				if n == nPrefix.toFloat() || math.IsNaN(n) && math.IsNaN(nPrefix.toFloat()) {
 					return
 				}
 			}

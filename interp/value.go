@@ -175,11 +175,24 @@ func (v value) num() float64 { // TODO typeNumI64
 	switch v.typ {
 	case typeStr, typeNumStr:
 		// Ensure string starts with a float and convert it
-		return parseFloatPrefix(v.s)
+		return parseNumberPrefix(v.s).toFloat()
 	default: // typeNum, typeNull
 		return v.n
 	}
 }
+
+/*// Return value's number value, converting from string if necessary
+func (v value) num() number {
+	switch v.typ {
+	case typeStr, typeNumStr:
+		// Ensure string starts with a float and convert it
+		return parseFloatPrefix(v.s)
+	case typeNumI64:
+		return numberInt64(v.l)
+	default: // typeNum, typeNull
+		return numberFloat(v.n)
+	}
+}*/
 
 // Return value's int64 number value, converting from string if necessary
 func (v value) numI64() int64 {
@@ -191,11 +204,40 @@ func (v value) numI64() int64 {
 	}
 }
 
+type numberType uint8
+
+const (
+	typeFloat numberType = iota
+	typeInt64
+)
+
+// TODO we can consider packing float & int in a single field (a-la C union)
+type number struct {
+	typ numberType
+	f   float64
+	l   int64
+}
+
+func numberFloat(f float64) number {
+	return number{typ: typeFloat, f: f}
+}
+func numberInt64(l int64) number {
+	return number{typ: typeInt64, l: l}
+}
+
+// number toFloat
+func (n number) toFloat() float64 {
+	if n.typ == typeInt64 {
+		return float64(n.l)
+	}
+	return n.f
+}
+
 var asciiSpace = [256]uint8{'\t': 1, '\n': 1, '\v': 1, '\f': 1, '\r': 1, ' ': 1}
 
 // Like strconv.ParseFloat, but parses at the start of string and
 // allows things like "1.5foo"
-func parseFloatPrefix(s string) float64 {
+func parseNumberPrefix(s string) number {
 	// Skip whitespace at start
 	i := 0
 	for i < len(s) && asciiSpace[s[i]] != 0 {
@@ -209,26 +251,29 @@ func parseFloatPrefix(s string) float64 {
 	}
 	if i+3 <= len(s) {
 		if hasNaNPrefix(s[i:]) {
-			return math.NaN()
+			return numberFloat(math.NaN())
 		}
 		if hasInfPrefix(s[i:]) {
 			if s[start] == '-' {
-				return math.Inf(-1)
+				return numberFloat(math.Inf(-1))
 			}
-			return math.Inf(1)
+			return numberFloat(math.Inf(1))
 		}
 	}
 
 	// Parse mantissa: initial digit(s), optional '.', then more digits
 	if i+2 < len(s) && hasHexPrefix(s[i:]) {
-		return parseHexFloatPrefix(s, start, i+2)
+		return numberFloat(parseHexFloatPrefix(s, start, i+2))
 	}
 	gotDigit := false
+	gotDot := false
+	gotExp := false
 	for i < len(s) && isDigit(s[i]) {
 		gotDigit = true
 		i++
 	}
 	if i < len(s) && s[i] == '.' {
+		gotDot = true
 		i++
 	}
 	for i < len(s) && isDigit(s[i]) {
@@ -236,13 +281,14 @@ func parseFloatPrefix(s string) float64 {
 		i++
 	}
 	if !gotDigit {
-		return 0
+		return numberInt64(0)
 	}
 
 	// Parse exponent ("1e" and similar are allowed, but ParseFloat
 	// rejects them)
 	end := i
 	if i < len(s) && (s[i] == 'e' || s[i] == 'E') {
+		gotExp = true
 		i++
 		if i < len(s) && (s[i] == '+' || s[i] == '-') {
 			i++
@@ -254,8 +300,12 @@ func parseFloatPrefix(s string) float64 {
 	}
 
 	floatStr := s[start:end]
+	if !gotDot && !gotExp {
+		l, _ := strconv.ParseInt(floatStr, 10, 64)
+		return numberInt64(l)
+	}
 	f, _ := strconv.ParseFloat(floatStr, 64)
-	return f // Returns infinity in case of "value out of range" error
+	return numberFloat(f) // Returns infinity in case of "value out of range" error
 }
 
 func hasHexPrefix(s string) bool {
@@ -270,8 +320,8 @@ func hasInfPrefix(s string) bool {
 	return (s[0] == 'i' || s[0] == 'I') && (s[1] == 'n' || s[1] == 'N') && (s[2] == 'f' || s[2] == 'F')
 }
 
-// Helper used by parseFloatPrefix to handle hexadecimal floating point.
-func parseHexFloatPrefix(s string, start, i int) float64 {
+// Helper used by parseNumberPrefix to handle hexadecimal floating point.
+func parseHexFloatPrefix(s string, start, i int) float64 { // TODO handle I64 case
 	gotDigit := false
 	for i < len(s) && isHexDigit(s[i]) {
 		gotDigit = true
