@@ -263,7 +263,7 @@ func parseNumberPrefix(s string) number {
 
 	// Parse mantissa: initial digit(s), optional '.', then more digits
 	if i+2 < len(s) && hasHexPrefix(s[i:]) {
-		return numberFloat(parseHexFloatPrefix(s, start, i+2))
+		return parseHexFloatPrefix(s, start, i+2)
 	}
 	gotDigit := false
 	gotDot := false
@@ -321,13 +321,16 @@ func hasInfPrefix(s string) bool {
 }
 
 // Helper used by parseNumberPrefix to handle hexadecimal floating point.
-func parseHexFloatPrefix(s string, start, i int) float64 { // TODO handle I64 case
+func parseHexFloatPrefix(s string, start, i int) number {
 	gotDigit := false
+	gotDot := false
+	gotExp := false // has p or P
 	for i < len(s) && isHexDigit(s[i]) {
 		gotDigit = true
 		i++
 	}
 	if i < len(s) && s[i] == '.' {
+		gotDot = true
 		i++
 	}
 	for i < len(s) && isHexDigit(s[i]) {
@@ -335,12 +338,13 @@ func parseHexFloatPrefix(s string, start, i int) float64 { // TODO handle I64 ca
 		i++
 	}
 	if !gotDigit {
-		return 0
+		return numberInt64(0)
 	}
 
 	gotExponent := false
 	end := i
 	if i < len(s) && (s[i] == 'p' || s[i] == 'P') {
+		gotExp = true
 		i++
 		if i < len(s) && (s[i] == '+' || s[i] == '-') {
 			i++
@@ -353,11 +357,15 @@ func parseHexFloatPrefix(s string, start, i int) float64 { // TODO handle I64 ca
 	}
 
 	floatStr := s[start:end]
+	if !gotDot && !gotExp {
+		l, _ := strconv.ParseInt(floatStr, 0, 64)
+		return numberInt64(l)
+	}
 	if !gotExponent {
 		floatStr += "p0" // AWK allows "0x12", ParseFloat requires "0x12p0"
 	}
 	f, _ := strconv.ParseFloat(floatStr, 64)
-	return f // Returns infinity in case of "value out of range" error
+	return numberFloat(f) // Returns infinity in case of "value out of range" error
 }
 
 func isDigit(c byte) bool {

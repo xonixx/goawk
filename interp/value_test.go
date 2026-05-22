@@ -25,9 +25,9 @@ func TestParseNumberPrefix(t *testing.T) {
 		{"-NaNx", numberFloat(math.NaN()), "negative nan"},
 		{"INFx", numberFloat(math.Inf(1)), "positive infinity"},
 		{"-infx", numberFloat(math.Inf(-1)), "negative infinity"},
-		{"0x10tail", numberFloat(16), "hex integer"},
+		{"0x10tail", numberInt64(16), "hex integer"},
 		{"-0xf.fp-1tail", numberFloat(-7.96875), "hex fraction"},
-		{"0x.tail", numberFloat(0), "hex without digits"},
+		{"0x.tail", numberInt64(0), "hex without digits"},
 	}
 
 	for _, tt := range tests {
