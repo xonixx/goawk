@@ -730,7 +730,7 @@ func (p *parser) primary() ast.Expr {
 		return &ast.GetlineExpr{Command: left, Target: target}
 	}
 	switch p.tok {
-	case lexer.NUMBER, lexer.NUMBER_I64: // TODO create NumI64Expr
+	case lexer.NUMBER, lexer.NUMBER_I64: // TODO create NumIntExpr
 		// AWK allows forms like "1.5e", but ParseFloat doesn't
 		s := strings.TrimRight(p.val, "eE")
 		n, _ := strconv.ParseFloat(s, 64)

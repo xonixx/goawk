@@ -416,11 +416,11 @@ func (p *interp) sprintf(format string, args []value) (string, error) {
 		case 's':
 			v = p.toString(a)
 		case 'd':
-			v = a.numI64()
+			v = a.toInt()
 		case 'f':
-			v = a.float()
+			v = a.toFloat()
 		case 'u':
-			v = uint64(a.numI64())
+			v = uint64(a.toInt())
 		case 'c':
 			var c []byte
 			n, isStr := a.isTrueStr()

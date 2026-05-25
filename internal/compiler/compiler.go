@@ -667,7 +667,7 @@ func (c *compiler) expr(expr ast.Expr) {
 	switch e := expr.(type) {
 	case *ast.NumExpr:
 		c.add(Num, opcodeInt(c.numIndex(e.Value)))
-	case *ast.NumI64Expr:
+	case *ast.NumIntExpr:
 		c.add(Num, opcodeInt(c.numIndex(float64(e.Value)))) // TODO impl
 
 	case *ast.StrExpr:
@@ -744,7 +744,7 @@ func (c *compiler) expr(expr ast.Expr) {
 		}
 		if e.Pre {
 			c.dupeIndexLValue(e.Expr)
-			c.expr(&ast.NumI64Expr{Value: 1})
+			c.expr(&ast.NumIntExpr{Value: 1})
 			c.add(op)
 			c.add(Dupe)
 			c.assignRoteIndex(e.Expr)
@@ -752,7 +752,7 @@ func (c *compiler) expr(expr ast.Expr) {
 			c.dupeIndexLValue(e.Expr)
 			c.add(UnaryPlus) // coerce result to number
 			c.add(Dupe)
-			c.expr(&ast.NumI64Expr{Value: 1})
+			c.expr(&ast.NumIntExpr{Value: 1})
 			c.add(op)
 			c.assignRoteIndex(e.Expr)
 		}

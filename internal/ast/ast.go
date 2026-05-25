@@ -90,7 +90,7 @@ func (e *BinaryExpr) node()     {}
 func (e *InExpr) node()         {}
 func (e *CondExpr) node()       {}
 func (e *NumExpr) node()        {}
-func (e *NumI64Expr) node()     {}
+func (e *NumIntExpr) node()     {}
 func (e *StrExpr) node()        {}
 func (e *RegExpr) node()        {}
 func (e *VarExpr) node()        {}
@@ -155,7 +155,7 @@ func (e *UnaryExpr) precedence() int      { return precUnary }
 func (e *InExpr) precedence() int         { return precIn }
 func (e *CondExpr) precedence() int       { return precCond }
 func (e *NumExpr) precedence() int        { return precPrimary }
-func (e *NumI64Expr) precedence() int     { return precPrimary }
+func (e *NumIntExpr) precedence() int     { return precPrimary }
 func (e *StrExpr) precedence() int        { return precPrimary }
 func (e *RegExpr) precedence() int        { return precPrimary }
 func (e *VarExpr) precedence() int        { return precPrimary }
@@ -294,12 +294,12 @@ func (e *NumExpr) String() string {
 	}
 }
 
-// NumI64Expr is a literal int number like 1234.
-type NumI64Expr struct {
+// NumIntExpr is a literal int number like 1234.
+type NumIntExpr struct {
 	Value int64
 }
 
-func (e *NumI64Expr) String() string {
+func (e *NumIntExpr) String() string {
 	return strconv.FormatInt(e.Value, 10)
 }
 

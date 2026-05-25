@@ -11,11 +11,11 @@ func TestParseNumberPrefix(t *testing.T) {
 		want number
 		name string
 	}{
-		{"", numberInt64(0), "empty"},
-		{"foo", numberInt64(0), "non-numeric"},
-		{"\t\n\v\f\r 42x", numberInt64(42), "ascii whitespace"},
-		{"12345xyz", numberInt64(12345), "decimal integer prefix"},
-		{" -123x", numberInt64(-123), "negative integer"},
+		{"", numberInt(0), "empty"},
+		{"foo", numberInt(0), "non-numeric"},
+		{"\t\n\v\f\r 42x", numberInt(42), "ascii whitespace"},
+		{"12345xyz", numberInt(12345), "decimal integer prefix"},
+		{" -123x", numberInt(-123), "negative integer"},
 		{"12.5kg", numberFloat(12.5), "decimal fraction"},
 		{".75x", numberFloat(0.75), "leading dot"},
 		{"7.foo", numberFloat(7), "trailing dot"},
@@ -25,9 +25,9 @@ func TestParseNumberPrefix(t *testing.T) {
 		{"-NaNx", numberFloat(math.NaN()), "negative nan"},
 		{"INFx", numberFloat(math.Inf(1)), "positive infinity"},
 		{"-infx", numberFloat(math.Inf(-1)), "negative infinity"},
-		{"0x10tail", numberInt64(16), "hex integer"},
+		{"0x10tail", numberInt(16), "hex integer"},
 		{"-0xf.fp-1tail", numberFloat(-7.96875), "hex fraction"},
-		{"0x.tail", numberInt64(0), "hex without digits"},
+		{"0x.tail", numberInt(0), "hex without digits"},
 	}
 
 	for _, tt := range tests {
@@ -45,7 +45,7 @@ func equalNumbers(a, b number) bool {
 		return false
 	}
 	switch a.typ {
-	case typeInt64:
+	case typeInt:
 		return a.l == b.l
 	case typeFloat:
 		return a.f == b.f || math.IsNaN(a.f) && math.IsNaN(b.f)

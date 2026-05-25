@@ -16,7 +16,7 @@ const (
 	typeStr
 	typeNum
 	typeNumStr
-	typeNumI64
+	typeNumInt
 )
 
 // An AWK value (these are passed around by value)
@@ -24,7 +24,7 @@ type value struct {
 	typ valueType // Type of value
 	s   string    // String value (for typeStr and typeNumStr)
 	n   float64   // Numeric value (for typeNum)
-	l   int64     // Numeric integer value (for typeNumI64)
+	l   int64     // Numeric integer value (for typeNumInt)
 }
 
 // Create a new null value
@@ -38,8 +38,8 @@ func num(n float64) value {
 }
 
 // Create a new int64 value
-func numI64(l int64) value {
-	return value{typ: typeNumI64, l: l}
+func numInt(l int64) value {
+	return value{typ: typeNumInt, l: l}
 }
 
 // Create a new string value
@@ -69,8 +69,8 @@ func (v value) String() string {
 		return fmt.Sprintf("num(%s)", v.str("%.6g"))
 	case typeNumStr:
 		return fmt.Sprintf("numStr(%q)", v.s)
-	case typeNumI64:
-		return fmt.Sprintf("numI64(%d)", v.l)
+	case typeNumInt:
+		return fmt.Sprintf("numInt(%d)", v.l)
 	default:
 		return "null()"
 	}
@@ -79,18 +79,18 @@ func (v value) String() string {
 // Return true if value is a "true string" (a string or a "numeric string"
 // from an input field that can't be converted to a number). If false,
 // also return the (possibly converted) number.
-func (v value) isTrueStr() (float64, bool) {
+func (v value) isTrueStr() (number, bool) {
 	switch v.typ {
 	case typeStr:
-		return 0, true
+		return numberInt(0), true
 	case typeNumStr:
 		f, err := parseFloat(v.s)
 		if err != nil {
 			return 0, true
 		}
 		return f, false
-	case typeNumI64:
-		panic("isTrueStr not implemented for typeNumI64") // TODO
+	case typeNumInt:
+		panic("isTrueStr not implemented for typeNumInt") // TODO
 	default: // typeNum, typeNull
 		return v.n, false
 	}
@@ -109,7 +109,7 @@ func (v value) boolean() bool {
 			return v.s != ""
 		}
 		return f != 0
-	case typeNumI64:
+	case typeNumInt:
 		return v.l != 0
 	default: // typeNum, typeNull
 		return v.n != 0
@@ -136,7 +136,7 @@ func parseFloat(s string) (float64, error) {
 	if err == nil && strings.IndexByte(s, '_') >= 0 {
 		// Underscore separators aren't supported by AWK.
 		return 0, strconv.ErrSyntax
-	}
+	} // TODO allow
 	return n, err
 }
 
@@ -162,7 +162,7 @@ func (v value) str(floatFormat string) string {
 			}
 			return fmt.Sprintf(floatFormat, v.n)
 		}
-	} else if v.typ == typeNumI64 {
+	} else if v.typ == typeNumInt {
 		return strconv.FormatInt(v.l, 10)
 	}
 	// For typeStr and typeNumStr we already have the string, for
@@ -176,28 +176,20 @@ func (v value) num() number {
 	case typeStr, typeNumStr:
 		// Ensure string starts with a float and convert it
 		return parseNumberPrefix(v.s)
-	case typeNumI64:
-		return numberInt64(v.l)
+	case typeNumInt:
+		return numberInt(v.l)
 	default: // typeNum, typeNull
 		return numberFloat(v.n)
 	}
 }
 
 // Return value's int64 number value, converting from string if necessary
-func (v value) numI64() int64 {
-	n := v.num()
-	switch n.typ {
-	case typeInt64:
-		return n.l
-	case typeFloat:
-		return int64(n.f)
-	default:
-		panic(n.typ)
-	}
+func (v value) toInt() int64 {
+	return v.num().toInt()
 }
 
 // Return value's float64 number value, converting from string if necessary
-func (v value) float() float64 {
+func (v value) toFloat() float64 {
 	return v.num().toFloat()
 }
 
@@ -205,7 +197,7 @@ type numberType uint8
 
 const (
 	typeFloat numberType = iota
-	typeInt64
+	typeInt
 )
 
 // TODO we can consider packing float & int in a single field (a-la C union)
@@ -218,16 +210,24 @@ type number struct {
 func numberFloat(f float64) number {
 	return number{typ: typeFloat, f: f}
 }
-func numberInt64(l int64) number {
-	return number{typ: typeInt64, l: l}
+func numberInt(l int64) number {
+	return number{typ: typeInt, l: l}
 }
 
 // number toFloat
 func (n number) toFloat() float64 {
-	if n.typ == typeInt64 {
+	if n.typ == typeInt {
 		return float64(n.l)
 	}
 	return n.f
+}
+
+// number toInt
+func (n number) toInt() int64 {
+	if n.typ == typeInt {
+		return n.l
+	}
+	return int64(n.f)
 }
 
 var asciiSpace = [256]uint8{'\t': 1, '\n': 1, '\v': 1, '\f': 1, '\r': 1, ' ': 1}
@@ -278,7 +278,7 @@ func parseNumberPrefix(s string) number {
 		i++
 	}
 	if !gotDigit {
-		return numberInt64(0)
+		return numberInt(0)
 	}
 
 	// Parse exponent ("1e" and similar are allowed, but ParseFloat
@@ -299,7 +299,7 @@ func parseNumberPrefix(s string) number {
 	floatStr := s[start:end]
 	if !gotDot && !gotExp {
 		l, _ := strconv.ParseInt(floatStr, 10, 64)
-		return numberInt64(l)
+		return numberInt(l)
 	}
 	f, _ := strconv.ParseFloat(floatStr, 64)
 	return numberFloat(f) // Returns infinity in case of "value out of range" error
@@ -335,7 +335,7 @@ func parseHexFloatPrefix(s string, start, i int) number {
 		i++
 	}
 	if !gotDigit {
-		return numberInt64(0)
+		return numberInt(0)
 	}
 
 	gotExponent := false
@@ -356,7 +356,7 @@ func parseHexFloatPrefix(s string, start, i int) number {
 	floatStr := s[start:end]
 	if !gotDot && !gotExp {
 		l, _ := strconv.ParseInt(floatStr, 0, 64)
-		return numberInt64(l)
+		return numberInt(l)
 	}
 	if !gotExponent {
 		floatStr += "p0" // AWK allows "0x12", ParseFloat requires "0x12p0"
