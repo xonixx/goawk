@@ -418,7 +418,7 @@ func (p *interp) sprintf(format string, args []value) (string, error) {
 		case 'd':
 			v = a.numI64()
 		case 'f':
-			v = a.num()
+			v = a.float()
 		case 'u':
 			v = uint64(a.numI64())
 		case 'c':

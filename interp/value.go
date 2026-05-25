@@ -171,37 +171,34 @@ func (v value) str(floatFormat string) string {
 }
 
 // Return value's number value, converting from string if necessary
-func (v value) num() float64 { // TODO typeNumI64
-	switch v.typ {
-	case typeStr, typeNumStr:
-		// Ensure string starts with a float and convert it
-		return parseNumberPrefix(v.s).toFloat()
-	default: // typeNum, typeNull
-		return v.n
-	}
-}
-
-/*// Return value's number value, converting from string if necessary
 func (v value) num() number {
 	switch v.typ {
 	case typeStr, typeNumStr:
 		// Ensure string starts with a float and convert it
-		return parseFloatPrefix(v.s)
+		return parseNumberPrefix(v.s)
 	case typeNumI64:
 		return numberInt64(v.l)
 	default: // typeNum, typeNull
 		return numberFloat(v.n)
 	}
-}*/
+}
 
 // Return value's int64 number value, converting from string if necessary
 func (v value) numI64() int64 {
-	switch v.typ {
-	case typeNumI64:
-		return v.l
-	default: // typeNum, typeNull
-		return int64(v.num())
+	n := v.num()
+	switch n.typ {
+	case typeInt64:
+		return n.l
+	case typeFloat:
+		return int64(n.f)
+	default:
+		panic(n.typ)
 	}
+}
+
+// Return value's float64 number value, converting from string if necessary
+func (v value) float() float64 {
+	return v.num().toFloat()
 }
 
 type numberType uint8

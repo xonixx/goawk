@@ -729,13 +729,13 @@ func (p *interp) nextLine() (string, error) {
 				// Previous input is file, close it
 				_ = prevInput.Close()
 			}
-			if p.filenameIndex >= int(p.argc.num()) && !p.hadFiles {
+			if p.filenameIndex >= int(p.argc.numI64()) && !p.hadFiles {
 				// Moved past number of ARGV args and haven't seen
 				// any files yet, use stdin
 				p.input = p.stdin
 				p.setFile("-")
 			} else {
-				if p.filenameIndex >= int(p.argc.num()) {
+				if p.filenameIndex >= int(p.argc.numI64()) {
 					// Done with ARGV args, all done with input
 					return "", io.EOF
 				}
@@ -806,8 +806,8 @@ func (p *interp) nextLine() (string, error) {
 	}
 
 	// Got a line (record) of input, return it
-	p.lineNum = num(p.lineNum.num() + 1)
-	p.fileLineNum = num(p.fileLineNum.num() + 1)
+	p.lineNum = numI64(p.lineNum.numI64() + 1)
+	p.fileLineNum = numI64(p.fileLineNum.numI64() + 1)
 	return p.scanner.Text(), nil
 }
 
