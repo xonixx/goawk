@@ -68,7 +68,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.Field:
 			index := p.peekTop()
-			v := p.getField(int(index.num()))
+			v := p.getField(int(index.toNumber().toInt()))
 			p.replaceTop(v)
 
 		case compiler.FieldInt:
@@ -144,7 +144,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.AssignField:
 			right, index := p.popTwo()
-			err := p.setField(int(index.num()), p.toString(right))
+			err := p.setField(int(index.toNumber().toInt()), p.toString(right))
 			if err != nil {
 				return err
 			}
@@ -213,9 +213,9 @@ func (p *interp) execute(code []compiler.Opcode) error {
 		case compiler.IncrField:
 			amount := code[ip]
 			ip++
-			index := int(p.pop().num())
+			index := int(p.pop().toNumber().toInt())
 			v := p.getField(index)
-			err := p.setField(index, p.toString(num(v.num()+float64(amount))))
+			err := p.setField(index, p.toString(v.toNumber().add(numberInt(int64(amount))).toValue()))
 			if err != nil {
 				return err
 			}
@@ -224,20 +224,20 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			amount := code[ip]
 			index := code[ip+1]
 			ip += 2
-			p.globals[index] = num(p.globals[index].num() + float64(amount))
+			p.globals[index] = p.globals[index].toNumber().add(numberInt(int64(amount))).toValue()
 
 		case compiler.IncrLocal:
 			amount := code[ip]
 			index := code[ip+1]
 			ip += 2
-			p.frame[index] = num(p.frame[index].num() + float64(amount))
+			p.frame[index] = p.frame[index].toNumber().add(numberInt(int64(amount))).toValue()
 
 		case compiler.IncrSpecial:
 			amount := code[ip]
 			index := int(code[ip+1])
 			ip += 2
 			v := p.getSpecial(index)
-			err := p.setSpecial(index, num(v.num()+float64(amount)))
+			err := p.setSpecial(index, v.toNumber().add(numberInt(int64(amount))).toValue())
 			if err != nil {
 				return err
 			}
@@ -248,7 +248,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			ip += 2
 			array := p.arrays[arrayIndex]
 			index := p.toString(p.pop())
-			array[index] = num(array[index].num() + float64(amount))
+			array[index] = array[index].toNumber().add(numberInt(int64(amount))).toValue()
 
 		case compiler.IncrArrayLocal:
 			amount := code[ip]
@@ -256,13 +256,13 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			ip += 2
 			array := p.localArray(int(arrayIndex))
 			index := p.toString(p.pop())
-			array[index] = num(array[index].num() + float64(amount))
+			array[index] = array[index].toNumber().add(numberInt(int64(amount))).toValue()
 
 		case compiler.AugAssignField:
 			operation := compiler.AugOp(code[ip])
 			ip++
 			right, indexVal := p.popTwo()
-			index := int(indexVal.num())
+			index := int(indexVal.toNumber().toInt())
 			field := p.getField(index)
 			v, err := p.augAssignOp(operation, field, right)
 			if err != nil {
@@ -350,23 +350,27 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.Add:
 			l, r := p.peekPop()
-			p.replaceTop(num(l.num() + r.num()))
+			p.replaceTop(l.toNumber().add(r.toNumber()).toValue())
 
 		case compiler.Subtract:
 			l, r := p.peekPop()
-			p.replaceTop(num(l.num() - r.num()))
+			p.replaceTop(l.toNumber().subtract(r.toNumber()).toValue())
 
 		case compiler.Multiply:
 			l, r := p.peekPop()
-			p.replaceTop(num(l.num() * r.num()))
+			p.replaceTop(l.toNumber().multiply(r.toNumber()).toValue())
 
 		case compiler.Divide:
 			l, r := p.peekPop()
-			rf := r.num()
-			if rf == 0.0 {
+			rf := r.toNumber()
+			if rf.isZero() {
 				return newError("division by zero")
 			}
-			p.replaceTop(num(l.num() / rf))
+			if l.typ == typeNumInt && r.typ == typeNumInt {
+				p.replaceTop(numInt(l.l / rf.l))
+			} else {
+				p.replaceTop(num(l.toFloat() / r.toFloat()))
+			}
 
 		case compiler.Power:
 			l, r := p.peekPop()

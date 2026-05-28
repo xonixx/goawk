@@ -90,7 +90,7 @@ func (v value) isTrueStrNew() (number, bool) {
 		}
 		return n, false
 	default: // typeNum, typeNumInt, typeNull
-		return v.numNew(), false
+		return v.toNumber(), false
 	}
 }
 
@@ -204,7 +204,7 @@ func (v value) str(floatFormat string) string {
 }
 
 // Return value's number value, converting from string if necessary
-func (v value) numNew() number {
+func (v value) toNumber() number {
 	switch v.typ {
 	case typeStr, typeNumStr:
 		// Ensure string starts with a number and convert it
@@ -216,7 +216,7 @@ func (v value) numNew() number {
 	}
 }
 
-func (v value) num() float64 { // TODO switch to numNew above
+func (v value) num() float64 { // TODO switch to toNumber() above
 	switch v.typ {
 	case typeStr, typeNumStr:
 		// Ensure string starts with a float and convert it
@@ -228,12 +228,12 @@ func (v value) num() float64 { // TODO switch to numNew above
 
 // Return value's int64 number value, converting from string if necessary
 func (v value) toInt() int64 {
-	return v.numNew().toInt()
+	return v.toNumber().toInt()
 }
 
 // Return value's float64 number value, converting from string if necessary
 func (v value) toFloat() float64 {
-	return v.numNew().toFloat()
+	return v.toNumber().toFloat()
 }
 
 type numberType uint8
@@ -271,6 +271,55 @@ func (n number) toInt() int64 {
 		return n.l
 	}
 	return int64(n.f)
+}
+
+// number isZero
+func (n number) isZero() bool {
+	if n.typ == typeInt {
+		return n.l == 0
+	}
+	return n.f == 0.0
+}
+
+// number toValue
+func (n number) toValue() value {
+	if n.typ == typeInt {
+		return value{typ: typeNumInt, l: n.l}
+	}
+	return value{typ: typeNum, n: n.f}
+}
+
+// number add
+func (n number) add(a number) number {
+	if n.typ != a.typ {
+		return numberFloat(n.toFloat() + a.toFloat())
+	}
+	if n.typ == typeInt {
+		return numberInt(n.l + a.l)
+	}
+	return numberFloat(n.f + a.f)
+}
+
+// number subtract
+func (n number) subtract(a number) number {
+	if n.typ != a.typ {
+		return numberFloat(n.toFloat() - a.toFloat())
+	}
+	if n.typ == typeInt {
+		return numberInt(n.l - a.l)
+	}
+	return numberFloat(n.f - a.f)
+}
+
+// number multiply
+func (n number) multiply(a number) number {
+	if n.typ != a.typ {
+		return numberFloat(n.toFloat() * a.toFloat())
+	}
+	if n.typ == typeInt {
+		return numberInt(n.l * a.l)
+	}
+	return numberFloat(n.f * a.f)
 }
 
 var asciiSpace = [256]uint8{'\t': 1, '\n': 1, '\v': 1, '\f': 1, '\r': 1, ' ': 1}
