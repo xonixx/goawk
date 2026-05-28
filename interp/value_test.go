@@ -45,6 +45,48 @@ func TestParseFloat(t *testing.T) {
 	}
 }
 
+func TestParseNumber(t *testing.T) {
+	tests := []struct {
+		in      string
+		want    number
+		wantErr bool
+		name    string
+	}{
+		{"42", numberInt(42), false, "decimal integer"},
+		{"\t\n  -42 \r", numberInt(-42), false, "trim whitespace"},
+		{"+17", numberInt(17), false, "positive integer"},
+		{"12.5", numberFloat(12.5), false, "decimal fraction"},
+		{"6.02e2", numberFloat(602), false, "exponent"},
+		{"+NaN", numberFloat(math.NaN()), false, "positive nan"},
+		{"-nan", numberFloat(math.NaN()), false, "negative nan"},
+		{"0x10", numberFloat(16), false, "hex integer without exponent"},
+		{"-0x1.8", numberFloat(-1.5), false, "signed hex fraction without exponent"},
+		{"0x1.8P2", numberFloat(6), false, "uppercase hex exponent"},
+		{"1_000", numberInt(0), true, "integer underscore rejected"},
+		{"1_000.5", numberInt(0), true, "float underscore rejected"},
+		{"12x", numberInt(0), true, "trailing text rejected"},
+		{"", numberInt(0), true, "empty rejected"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := parseNumber(tt.in)
+			if tt.wantErr {
+				if !errors.Is(err, strconv.ErrSyntax) {
+					t.Fatalf("parseNumber(%q) error = %v, want syntax error", tt.in, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("parseNumber(%q) unexpected error: %v", tt.in, err)
+			}
+			if !equalNumbers(got, tt.want) {
+				t.Fatalf("parseNumber(%q) = %#v, want %#v", tt.in, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestParseNumberPrefix(t *testing.T) {
 	tests := []struct {
 		in   string

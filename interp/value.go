@@ -157,6 +157,41 @@ func parseFloat(s string) (float64, error) {
 	return n, err
 }
 
+// Tries to parse a string as an integer number, otherwise as float.
+// For floats is like strconv.ParseFloat, but allow hex floating point without exponent, and
+// allow "+nan" and "-nan" (though they both return math.NaN()). Also disallow
+// underscore digit separators.
+func parseNumber(s string) (number, error) {
+	s = strings.TrimSpace(s)
+	if len(s) > 1 && (s[0] == '+' || s[0] == '-') {
+		if len(s) == 4 && hasNaNPrefix(s[1:]) {
+			// ParseFloat doesn't handle "nan" with sign prefix, so handle it here.
+			return numberFloat(math.NaN()), nil
+		}
+		if len(s) > 3 && hasHexPrefix(s[1:]) && strings.IndexAny(s, "pP") < 0 {
+			s += "p0"
+		}
+	} else if len(s) > 2 && hasHexPrefix(s) && strings.IndexAny(s, "pP") < 0 {
+		s += "p0"
+	}
+	if strings.IndexAny(s, "pPeE.") < 0 { // int
+		l, err := strconv.ParseInt(s, 10, 64)
+		if err == nil && strings.IndexByte(s, '_') >= 0 {
+			// Underscore separators aren't supported by AWK.
+			return numberInt(0), strconv.ErrSyntax
+		} // TODO allow
+		// todo if number is too large to fit in int64, shall we parse as float?
+		return numberInt(l), err
+	} else { // float
+		n, err := strconv.ParseFloat(s, 64)
+		if err == nil && strings.IndexByte(s, '_') >= 0 {
+			// Underscore separators aren't supported by AWK.
+			return numberInt(0), strconv.ErrSyntax
+		} // TODO allow
+		return numberFloat(n), err
+	}
+}
+
 // Return value's string value, or convert to a string using given
 // format if a number value. Integers are a special case and don't
 // use floatFormat.
