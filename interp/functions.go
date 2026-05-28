@@ -423,7 +423,7 @@ func (p *interp) sprintf(format string, args []value) (string, error) {
 			v = uint64(a.toInt())
 		case 'c':
 			var c []byte
-			n, isStr := a.isTrueStr()
+			n, isStr := a.isTrueStrNew()
 			if isStr {
 				s := p.toString(a)
 				if len(s) == 0 {
@@ -437,10 +437,10 @@ func (p *interp) sprintf(format string, args []value) (string, error) {
 			} else {
 				if p.chars {
 					buf := make([]byte, utf8.UTFMax)
-					size := utf8.EncodeRune(buf, rune(n))
+					size := utf8.EncodeRune(buf, rune(n.toInt()))
 					c = buf[:size]
 				} else {
-					c = []byte{byte(n)}
+					c = []byte{byte(n.toInt())}
 				}
 			}
 			v = c

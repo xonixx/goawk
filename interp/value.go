@@ -55,9 +55,9 @@ func numStr(s string) value {
 // Create a numeric value from a Go bool
 func boolean(b bool) value {
 	if b {
-		return num(1)
+		return numInt(1)
 	}
-	return num(0)
+	return numInt(0)
 }
 
 // String returns a string representation of v for debugging.
@@ -79,37 +79,18 @@ func (v value) String() string {
 // Return true if value is a "true string" (a string or a "numeric string"
 // from an input field that can't be converted to a number). If false,
 // also return the (possibly converted) number.
-/*func (v value) isTrueStrNew() (number, bool) {
+func (v value) isTrueStrNew() (number, bool) {
 	switch v.typ {
 	case typeStr:
 		return numberInt(0), true
 	case typeNumStr:
-		f, err := parseFloat(v.s)
+		n, err := parseNumber(v.s)
 		if err != nil {
-			return 0, true
+			return n, true
 		}
-		return f, false
-	case typeNumInt:
-		panic("isTrueStr not implemented for typeNumInt") // TODO
-	default: // typeNum, typeNull
-		return v.n, false
-	}
-}*/
-
-func (v value) isTrueStr() (float64, bool) { // TODO switch to above isTrueStrNew
-	switch v.typ {
-	case typeStr:
-		return 0, true
-	case typeNumStr:
-		f, err := parseFloat(v.s)
-		if err != nil {
-			return 0, true
-		}
-		return f, false
-	case typeNumInt:
-		panic("isTrueStr not implemented for typeNumI64") // TODO
-	default: // typeNum, typeNull
-		return v.n, false
+		return n, false
+	default: // typeNum, typeNumInt, typeNull
+		return v.numNew(), false
 	}
 }
 
@@ -226,7 +207,7 @@ func (v value) str(floatFormat string) string {
 func (v value) numNew() number {
 	switch v.typ {
 	case typeStr, typeNumStr:
-		// Ensure string starts with a float and convert it
+		// Ensure string starts with a number and convert it
 		return parseNumberPrefix(v.s)
 	case typeNumInt:
 		return numberInt(v.l)

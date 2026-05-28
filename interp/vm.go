@@ -382,62 +382,86 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.Equals:
 			l, r := p.peekPop()
-			ln, lIsStr := l.isTrueStr()
-			rn, rIsStr := r.isTrueStr()
+			ln, lIsStr := l.isTrueStrNew()
+			rn, rIsStr := r.isTrueStrNew()
 			if lIsStr || rIsStr {
 				p.replaceTop(boolean(p.toString(l) == p.toString(r)))
-			} else {
-				p.replaceTop(boolean(ln == rn))
+			} else if ln.typ != rn.typ {
+				p.replaceTop(boolean(ln.toFloat() == rn.toFloat()))
+			} else if ln.typ == typeInt {
+				p.replaceTop(boolean(ln.l == rn.l))
+			} else { // float
+				p.replaceTop(boolean(ln.f == rn.f))
 			}
 
 		case compiler.NotEquals:
 			l, r := p.peekPop()
-			ln, lIsStr := l.isTrueStr()
-			rn, rIsStr := r.isTrueStr()
+			ln, lIsStr := l.isTrueStrNew()
+			rn, rIsStr := r.isTrueStrNew()
 			if lIsStr || rIsStr {
 				p.replaceTop(boolean(p.toString(l) != p.toString(r)))
-			} else {
-				p.replaceTop(boolean(ln != rn))
+			} else if ln.typ != rn.typ {
+				p.replaceTop(boolean(ln.toFloat() != rn.toFloat()))
+			} else if ln.typ == typeInt {
+				p.replaceTop(boolean(ln.l != rn.l))
+			} else { // float
+				p.replaceTop(boolean(ln.f != rn.f))
 			}
 
 		case compiler.Less:
 			l, r := p.peekPop()
-			ln, lIsStr := l.isTrueStr()
-			rn, rIsStr := r.isTrueStr()
+			ln, lIsStr := l.isTrueStrNew()
+			rn, rIsStr := r.isTrueStrNew()
 			if lIsStr || rIsStr {
 				p.replaceTop(boolean(p.toString(l) < p.toString(r)))
-			} else {
-				p.replaceTop(boolean(ln < rn))
+			} else if ln.typ != rn.typ {
+				p.replaceTop(boolean(ln.toFloat() < rn.toFloat()))
+			} else if ln.typ == typeInt {
+				p.replaceTop(boolean(ln.l < rn.l))
+			} else { // float
+				p.replaceTop(boolean(ln.f < rn.f))
 			}
 
 		case compiler.Greater:
 			l, r := p.peekPop()
-			ln, lIsStr := l.isTrueStr()
-			rn, rIsStr := r.isTrueStr()
+			ln, lIsStr := l.isTrueStrNew()
+			rn, rIsStr := r.isTrueStrNew()
 			if lIsStr || rIsStr {
 				p.replaceTop(boolean(p.toString(l) > p.toString(r)))
-			} else {
-				p.replaceTop(boolean(ln > rn))
+			} else if ln.typ != rn.typ {
+				p.replaceTop(boolean(ln.toFloat() > rn.toFloat()))
+			} else if ln.typ == typeInt {
+				p.replaceTop(boolean(ln.l > rn.l))
+			} else { // float
+				p.replaceTop(boolean(ln.f > rn.f))
 			}
 
 		case compiler.LessOrEqual:
 			l, r := p.peekPop()
-			ln, lIsStr := l.isTrueStr()
-			rn, rIsStr := r.isTrueStr()
+			ln, lIsStr := l.isTrueStrNew()
+			rn, rIsStr := r.isTrueStrNew()
 			if lIsStr || rIsStr {
 				p.replaceTop(boolean(p.toString(l) <= p.toString(r)))
-			} else {
-				p.replaceTop(boolean(ln <= rn))
+			} else if ln.typ != rn.typ {
+				p.replaceTop(boolean(ln.toFloat() <= rn.toFloat()))
+			} else if ln.typ == typeInt {
+				p.replaceTop(boolean(ln.l <= rn.l))
+			} else { // float
+				p.replaceTop(boolean(ln.f <= rn.f))
 			}
 
 		case compiler.GreaterOrEqual:
 			l, r := p.peekPop()
-			ln, lIsStr := l.isTrueStr()
-			rn, rIsStr := r.isTrueStr()
+			ln, lIsStr := l.isTrueStrNew()
+			rn, rIsStr := r.isTrueStrNew()
 			if lIsStr || rIsStr {
 				p.replaceTop(boolean(p.toString(l) >= p.toString(r)))
-			} else {
-				p.replaceTop(boolean(ln >= rn))
+			} else if ln.typ != rn.typ {
+				p.replaceTop(boolean(ln.toFloat() >= rn.toFloat()))
+			} else if ln.typ == typeInt {
+				p.replaceTop(boolean(ln.l >= rn.l))
+			} else { // float
+				p.replaceTop(boolean(ln.f >= rn.f))
 			}
 
 		case compiler.Concat:
@@ -509,13 +533,17 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			offset := code[ip]
 			ip++
 			l, r := p.popTwo()
-			ln, lIsStr := l.isTrueStr()
-			rn, rIsStr := r.isTrueStr()
+			ln, lIsStr := l.isTrueStrNew()
+			rn, rIsStr := r.isTrueStrNew()
 			var b bool
 			if lIsStr || rIsStr {
 				b = p.toString(l) == p.toString(r)
-			} else {
-				b = ln == rn
+			} else if ln.typ != rn.typ {
+				b = ln.toFloat() == rn.toFloat()
+			} else if ln.typ == typeInt {
+				b = ln.l == rn.l
+			} else { // float
+				b = ln.f == rn.f
 			}
 			if b {
 				ip += int(offset)
@@ -525,13 +553,17 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			offset := code[ip]
 			ip++
 			l, r := p.popTwo()
-			ln, lIsStr := l.isTrueStr()
-			rn, rIsStr := r.isTrueStr()
+			ln, lIsStr := l.isTrueStrNew()
+			rn, rIsStr := r.isTrueStrNew()
 			var b bool
 			if lIsStr || rIsStr {
 				b = p.toString(l) != p.toString(r)
-			} else {
-				b = ln != rn
+			} else if ln.typ != rn.typ {
+				b = ln.toFloat() != rn.toFloat()
+			} else if ln.typ == typeInt {
+				b = ln.l != rn.l
+			} else { // float
+				b = ln.f != rn.f
 			}
 			if b {
 				ip += int(offset)
@@ -541,13 +573,17 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			offset := code[ip]
 			ip++
 			l, r := p.popTwo()
-			ln, lIsStr := l.isTrueStr()
-			rn, rIsStr := r.isTrueStr()
+			ln, lIsStr := l.isTrueStrNew()
+			rn, rIsStr := r.isTrueStrNew()
 			var b bool
 			if lIsStr || rIsStr {
 				b = p.toString(l) < p.toString(r)
-			} else {
-				b = ln < rn
+			} else if ln.typ != rn.typ {
+				b = ln.toFloat() < rn.toFloat()
+			} else if ln.typ == typeInt {
+				b = ln.l < rn.l
+			} else { // float
+				b = ln.f < rn.f
 			}
 			if b {
 				ip += int(offset)
@@ -557,13 +593,17 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			offset := code[ip]
 			ip++
 			l, r := p.popTwo()
-			ln, lIsStr := l.isTrueStr()
-			rn, rIsStr := r.isTrueStr()
+			ln, lIsStr := l.isTrueStrNew()
+			rn, rIsStr := r.isTrueStrNew()
 			var b bool
 			if lIsStr || rIsStr {
 				b = p.toString(l) > p.toString(r)
-			} else {
-				b = ln > rn
+			} else if ln.typ != rn.typ {
+				b = ln.toFloat() > rn.toFloat()
+			} else if ln.typ == typeInt {
+				b = ln.l > rn.l
+			} else { // float
+				b = ln.f > rn.f
 			}
 			if b {
 				ip += int(offset)
@@ -573,13 +613,17 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			offset := code[ip]
 			ip++
 			l, r := p.popTwo()
-			ln, lIsStr := l.isTrueStr()
-			rn, rIsStr := r.isTrueStr()
+			ln, lIsStr := l.isTrueStrNew()
+			rn, rIsStr := r.isTrueStrNew()
 			var b bool
 			if lIsStr || rIsStr {
 				b = p.toString(l) <= p.toString(r)
-			} else {
-				b = ln <= rn
+			} else if ln.typ != rn.typ {
+				b = ln.toFloat() <= rn.toFloat()
+			} else if ln.typ == typeInt {
+				b = ln.l <= rn.l
+			} else { // float
+				b = ln.f <= rn.f
 			}
 			if b {
 				ip += int(offset)
@@ -589,13 +633,17 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			offset := code[ip]
 			ip++
 			l, r := p.popTwo()
-			ln, lIsStr := l.isTrueStr()
-			rn, rIsStr := r.isTrueStr()
+			ln, lIsStr := l.isTrueStrNew()
+			rn, rIsStr := r.isTrueStrNew()
 			var b bool
 			if lIsStr || rIsStr {
 				b = p.toString(l) >= p.toString(r)
-			} else {
-				b = ln >= rn
+			} else if ln.typ != rn.typ {
+				b = ln.toFloat() >= rn.toFloat()
+			} else if ln.typ == typeInt {
+				b = ln.l >= rn.l
+			} else { // float
+				b = ln.f >= rn.f
 			}
 			if b {
 				ip += int(offset)
