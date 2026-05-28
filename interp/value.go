@@ -79,7 +79,7 @@ func (v value) String() string {
 // Return true if value is a "true string" (a string or a "numeric string"
 // from an input field that can't be converted to a number). If false,
 // also return the (possibly converted) number.
-func (v value) isTrueStr() (number, bool) {
+/*func (v value) isTrueStrNew() (number, bool) {
 	switch v.typ {
 	case typeStr:
 		return numberInt(0), true
@@ -91,6 +91,23 @@ func (v value) isTrueStr() (number, bool) {
 		return f, false
 	case typeNumInt:
 		panic("isTrueStr not implemented for typeNumInt") // TODO
+	default: // typeNum, typeNull
+		return v.n, false
+	}
+}*/
+
+func (v value) isTrueStr() (float64, bool) { // TODO switch to above isTrueStrNew
+	switch v.typ {
+	case typeStr:
+		return 0, true
+	case typeNumStr:
+		f, err := parseFloat(v.s)
+		if err != nil {
+			return 0, true
+		}
+		return f, false
+	case typeNumInt:
+		panic("isTrueStr not implemented for typeNumI64") // TODO
 	default: // typeNum, typeNull
 		return v.n, false
 	}
@@ -126,10 +143,10 @@ func parseFloat(s string) (float64, error) {
 			// ParseFloat doesn't handle "nan" with sign prefix, so handle it here.
 			return math.NaN(), nil
 		}
-		if len(s) > 3 && hasHexPrefix(s[1:]) && strings.IndexByte(s, 'p') < 0 {
+		if len(s) > 3 && hasHexPrefix(s[1:]) && strings.IndexAny(s, "pP") < 0 {
 			s += "p0"
 		}
-	} else if len(s) > 2 && hasHexPrefix(s) && strings.IndexByte(s, 'p') < 0 {
+	} else if len(s) > 2 && hasHexPrefix(s) && strings.IndexAny(s, "pP") < 0 {
 		s += "p0"
 	}
 	n, err := strconv.ParseFloat(s, 64)
@@ -171,7 +188,7 @@ func (v value) str(floatFormat string) string {
 }
 
 // Return value's number value, converting from string if necessary
-func (v value) num() number {
+func (v value) numNew() number {
 	switch v.typ {
 	case typeStr, typeNumStr:
 		// Ensure string starts with a float and convert it
@@ -183,14 +200,24 @@ func (v value) num() number {
 	}
 }
 
+func (v value) num() float64 { // TODO switch to numNew above
+	switch v.typ {
+	case typeStr, typeNumStr:
+		// Ensure string starts with a float and convert it
+		return parseNumberPrefix(v.s).toFloat()
+	default: // typeNum, typeNull
+		return v.n
+	}
+}
+
 // Return value's int64 number value, converting from string if necessary
 func (v value) toInt() int64 {
-	return v.num().toInt()
+	return v.numNew().toInt()
 }
 
 // Return value's float64 number value, converting from string if necessary
 func (v value) toFloat() float64 {
-	return v.num().toFloat()
+	return v.numNew().toFloat()
 }
 
 type numberType uint8
@@ -260,7 +287,7 @@ func parseNumberPrefix(s string) number {
 
 	// Parse mantissa: initial digit(s), optional '.', then more digits
 	if i+2 < len(s) && hasHexPrefix(s[i:]) {
-		return parseHexFloatPrefix(s, start, i+2)
+		return parseHexNumberPrefix(s, start, i+2)
 	}
 	gotDigit := false
 	gotDot := false
@@ -299,6 +326,7 @@ func parseNumberPrefix(s string) number {
 	floatStr := s[start:end]
 	if !gotDot && !gotExp {
 		l, _ := strconv.ParseInt(floatStr, 10, 64)
+		// todo if number is too large to fit in int64, shall we parse as float?
 		return numberInt(l)
 	}
 	f, _ := strconv.ParseFloat(floatStr, 64)
@@ -318,7 +346,7 @@ func hasInfPrefix(s string) bool {
 }
 
 // Helper used by parseNumberPrefix to handle hexadecimal floating point.
-func parseHexFloatPrefix(s string, start, i int) number {
+func parseHexNumberPrefix(s string, start, i int) number {
 	gotDigit := false
 	gotDot := false
 	gotExp := false // has p or P

@@ -1,9 +1,49 @@
 package interp
 
 import (
+	"errors"
 	"math"
+	"strconv"
 	"testing"
 )
+
+func TestParseFloat(t *testing.T) {
+	tests := []struct {
+		in      string
+		want    float64
+		wantErr bool
+		name    string
+	}{
+		{"12.5", 12.5, false, "decimal"},
+		{"\t\n  -42.25 \r", -42.25, false, "trim whitespace"},
+		{"+NaN", math.NaN(), false, "positive nan"},
+		{"-nan", math.NaN(), false, "negative nan"},
+		{"+inf", math.Inf(1), false, "positive infinity"},
+		{"0x10", 16, false, "hex integer without exponent"},
+		{"-0x1.8", -1.5, false, "signed hex fraction without exponent"},
+		{"0x1.8P2", 6, false, "uppercase hex exponent"},
+		{"1_000", 0, true, "underscore rejected"},
+		{"12x", 0, true, "trailing text rejected"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := parseFloat(tt.in)
+			if tt.wantErr {
+				if !errors.Is(err, strconv.ErrSyntax) {
+					t.Fatalf("parseFloat(%q) error = %v, want syntax error", tt.in, err)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("parseFloat(%q) unexpected error: %v", tt.in, err)
+			}
+			if !equalFloats(got, tt.want) {
+				t.Fatalf("parseFloat(%q) = %v, want %v", tt.in, got, tt.want)
+			}
+		})
+	}
+}
 
 func TestParseNumberPrefix(t *testing.T) {
 	tests := []struct {
@@ -38,6 +78,10 @@ func TestParseNumberPrefix(t *testing.T) {
 			}
 		})
 	}
+}
+
+func equalFloats(a, b float64) bool {
+	return a == b || math.IsNaN(a) && math.IsNaN(b)
 }
 
 func equalNumbers(a, b number) bool {
