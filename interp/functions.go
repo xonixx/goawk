@@ -72,29 +72,29 @@ func (p *interp) toNative(v value, typ reflect.Type) reflect.Value {
 	case reflect.Bool:
 		return reflect.ValueOf(v.boolean())
 	case reflect.Int:
-		return reflect.ValueOf(int(v.num()))
+		return reflect.ValueOf(int(v.toInt()))
 	case reflect.Int8:
-		return reflect.ValueOf(int8(v.num()))
+		return reflect.ValueOf(int8(v.toInt()))
 	case reflect.Int16:
-		return reflect.ValueOf(int16(v.num()))
+		return reflect.ValueOf(int16(v.toInt()))
 	case reflect.Int32:
-		return reflect.ValueOf(int32(v.num()))
+		return reflect.ValueOf(int32(v.toInt()))
 	case reflect.Int64:
-		return reflect.ValueOf(int64(v.num()))
+		return reflect.ValueOf(v.toInt())
 	case reflect.Uint:
-		return reflect.ValueOf(uint(int64(v.num())))
+		return reflect.ValueOf(uint(v.toInt()))
 	case reflect.Uint8:
-		return reflect.ValueOf(uint8(int64(v.num())))
+		return reflect.ValueOf(uint8(v.toInt()))
 	case reflect.Uint16:
-		return reflect.ValueOf(uint16(int64(v.num())))
+		return reflect.ValueOf(uint16(v.toInt()))
 	case reflect.Uint32:
-		return reflect.ValueOf(uint32(int64(v.num())))
+		return reflect.ValueOf(uint32(v.toInt()))
 	case reflect.Uint64:
-		return reflect.ValueOf(uint64(int64(v.num())))
+		return reflect.ValueOf(uint64(v.toInt()))
 	case reflect.Float32:
-		return reflect.ValueOf(float32(v.num()))
+		return reflect.ValueOf(float32(v.toFloat()))
 	case reflect.Float64:
-		return reflect.ValueOf(v.num())
+		return reflect.ValueOf(v.toFloat())
 	case reflect.String:
 		return reflect.ValueOf(p.toString(v))
 	case reflect.Slice:

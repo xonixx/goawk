@@ -33,7 +33,7 @@ func null() value {
 }
 
 // Create a new number value
-func num(n float64) value {
+func num(n float64) value { // TODO replace all num(0) usage to int
 	return value{typ: typeNum, n: n}
 }
 
@@ -102,11 +102,11 @@ func (v value) boolean() bool {
 	case typeStr:
 		return v.s != ""
 	case typeNumStr:
-		f, err := parseFloat(v.s)
+		f, err := parseNumber(v.s)
 		if err != nil {
 			return v.s != ""
 		}
-		return f != 0
+		return !f.isZero()
 	case typeNumInt:
 		return v.l != 0
 	default: // typeNum, typeNull
@@ -114,7 +114,7 @@ func (v value) boolean() bool {
 	}
 }
 
-// Like strconv.ParseFloat, but allow hex floating point without exponent, and
+/*// Like strconv.ParseFloat, but allow hex floating point without exponent, and
 // allow "+nan" and "-nan" (though they both return math.NaN()). Also disallow
 // underscore digit separators.
 func parseFloat(s string) (float64, error) {
@@ -136,7 +136,7 @@ func parseFloat(s string) (float64, error) {
 		return 0, strconv.ErrSyntax
 	} // TODO allow
 	return n, err
-}
+}*/
 
 // Tries to parse a string as an integer number, otherwise as float.
 // For floats is like strconv.ParseFloat, but allow hex floating point without exponent, and
@@ -216,6 +216,7 @@ func (v value) toNumber() number {
 	}
 }
 
+/*// deprecated: use toNumber()
 func (v value) num() float64 { // TODO switch to toNumber() above
 	switch v.typ {
 	case typeStr, typeNumStr:
@@ -224,7 +225,7 @@ func (v value) num() float64 { // TODO switch to toNumber() above
 	default: // typeNum, typeNull
 		return v.n
 	}
-}
+}*/
 
 // Return value's int64 number value, converting from string if necessary
 func (v value) toInt() int64 {
@@ -281,6 +282,14 @@ func (n number) isZero() bool {
 	return n.f == 0.0
 }
 
+// number negate
+func (n number) negate() number {
+	if n.typ == typeInt {
+		return numberInt(-n.l)
+	}
+	return numberFloat(-n.f)
+}
+
 // number toValue
 func (n number) toValue() value {
 	if n.typ == typeInt {
@@ -320,6 +329,28 @@ func (n number) multiply(a number) number {
 		return numberInt(n.l * a.l)
 	}
 	return numberFloat(n.f * a.f)
+}
+
+// number divide
+func (n number) divide(a number) number {
+	if n.typ != a.typ {
+		return numberFloat(n.toFloat() / a.toFloat())
+	}
+	if n.typ == typeInt {
+		return numberInt(n.l / a.l)
+	}
+	return numberFloat(n.f / a.f)
+}
+
+// number modulo
+func (n number) modulo(a number) number {
+	if n.typ != a.typ {
+		return numberFloat(math.Mod(n.toFloat(), a.toFloat()))
+	}
+	if n.typ == typeInt {
+		return numberInt(n.l % a.l)
+	}
+	return numberFloat(math.Mod(n.f, a.f))
 }
 
 var asciiSpace = [256]uint8{'\t': 1, '\n': 1, '\v': 1, '\f': 1, '\r': 1, ' ': 1}

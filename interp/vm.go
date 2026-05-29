@@ -68,7 +68,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.Field:
 			index := p.peekTop()
-			v := p.getField(int(index.toNumber().toInt()))
+			v := p.getField(int(index.toInt()))
 			p.replaceTop(v)
 
 		case compiler.FieldInt:
@@ -144,7 +144,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.AssignField:
 			right, index := p.popTwo()
-			err := p.setField(int(index.toNumber().toInt()), p.toString(right))
+			err := p.setField(int(index.toInt()), p.toString(right))
 			if err != nil {
 				return err
 			}
@@ -154,8 +154,8 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			// substitution (n>0), to avoid rebuilding $0 in that case.
 			right, index := p.popTwo()
 			n := p.peekTop()
-			if n.num() > 0 {
-				err := p.setField(int(index.num()), p.toString(right))
+			if n.toInt() > 0 { // TODO check
+				err := p.setField(int(index.toInt()), p.toString(right))
 				if err != nil {
 					return err
 				}
@@ -213,7 +213,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 		case compiler.IncrField:
 			amount := code[ip]
 			ip++
-			index := int(p.pop().toNumber().toInt())
+			index := int(p.pop().toInt())
 			v := p.getField(index)
 			err := p.setField(index, p.toString(v.toNumber().add(numberInt(int64(amount))).toValue()))
 			if err != nil {
@@ -262,7 +262,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			operation := compiler.AugOp(code[ip])
 			ip++
 			right, indexVal := p.popTwo()
-			index := int(indexVal.toNumber().toInt())
+			index := int(indexVal.toInt())
 			field := p.getField(index)
 			v, err := p.augAssignOp(operation, field, right)
 			if err != nil {
@@ -366,23 +366,19 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			if rf.isZero() {
 				return newError("division by zero")
 			}
-			if l.typ == typeNumInt && r.typ == typeNumInt {
-				p.replaceTop(numInt(l.l / rf.l))
-			} else {
-				p.replaceTop(num(l.toFloat() / r.toFloat()))
-			}
+			p.replaceTop(l.toNumber().divide(r.toNumber()).toValue())
 
 		case compiler.Power:
 			l, r := p.peekPop()
-			p.replaceTop(num(math.Pow(l.num(), r.num())))
+			p.replaceTop(num(math.Pow(l.toFloat(), r.toFloat())))
 
 		case compiler.Modulo:
 			l, r := p.peekPop()
-			rf := r.num()
-			if rf == 0.0 {
-				return newError("division by zero in mod")
+			rf := r.toNumber()
+			if rf.isZero() {
+				return newError("division by zero")
 			}
-			p.replaceTop(num(math.Mod(l.num(), rf)))
+			p.replaceTop(l.toNumber().modulo(r.toNumber()).toValue())
 
 		case compiler.Equals:
 			l, r := p.peekPop()
@@ -505,10 +501,10 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			p.replaceTop(boolean(!p.peekTop().boolean()))
 
 		case compiler.UnaryMinus:
-			p.replaceTop(num(-p.peekTop().num()))
+			p.replaceTop(p.peekTop().toNumber().negate().toValue())
 
 		case compiler.UnaryPlus:
-			p.replaceTop(num(p.peekTop().num()))
+			p.replaceTop(p.peekTop().toNumber().toValue())
 
 		case compiler.Boolean:
 			p.replaceTop(boolean(p.peekTop().boolean()))
@@ -664,7 +660,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			return errExit
 
 		case compiler.ExitStatus:
-			p.exitStatus = int(p.pop().num())
+			p.exitStatus = int(p.pop().toInt())
 			return errExit
 
 		case compiler.ForIn:
@@ -978,7 +974,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 	switch builtinOp {
 	case compiler.BuiltinAtan2:
 		y, x := p.peekPop()
-		p.replaceTop(num(math.Atan2(y.num(), x.num())))
+		p.replaceTop(num(math.Atan2(y.toFloat(), x.toFloat())))
 
 	case compiler.BuiltinClose:
 		var err error
@@ -1002,10 +998,10 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 		p.replaceTop(num(float64(code)))
 
 	case compiler.BuiltinCos:
-		p.replaceTop(num(math.Cos(p.peekTop().num())))
+		p.replaceTop(num(math.Cos(p.peekTop().toFloat())))
 
 	case compiler.BuiltinExp:
-		p.replaceTop(num(math.Exp(p.peekTop().num())))
+		p.replaceTop(num(math.Exp(p.peekTop().toFloat())))
 
 	case compiler.BuiltinFflush:
 		name := p.toString(p.peekTop())
@@ -1054,7 +1050,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 		p.replaceTop(num(float64(awkIndex)))
 
 	case compiler.BuiltinInt:
-		p.replaceTop(num(float64(int64(p.peekTop().num()))))
+		p.replaceTop(numInt(p.peekTop().toInt()))
 
 	case compiler.BuiltinLength:
 		var length int
@@ -1076,7 +1072,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 		p.replaceTop(num(float64(length)))
 
 	case compiler.BuiltinLog:
-		p.replaceTop(num(math.Log(p.peekTop().num())))
+		p.replaceTop(num(math.Log(p.peekTop().toFloat())))
 
 	case compiler.BuiltinMatch:
 		sValue, regex := p.peekPop()
@@ -1102,10 +1098,10 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 		p.push(num(p.random.Float64()))
 
 	case compiler.BuiltinSin:
-		p.replaceTop(num(math.Sin(p.peekTop().num())))
+		p.replaceTop(num(math.Sin(p.peekTop().toFloat())))
 
 	case compiler.BuiltinSqrt:
-		p.replaceTop(num(math.Sqrt(p.peekTop().num())))
+		p.replaceTop(num(math.Sqrt(p.peekTop().toFloat())))
 
 	case compiler.BuiltinSrand:
 		prevSeed := p.randSeed
@@ -1115,7 +1111,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 
 	case compiler.BuiltinSrandSeed:
 		prevSeed := p.randSeed
-		p.randSeed = p.peekTop().num()
+		p.randSeed = p.peekTop().toFloat()
 		p.random.Seed(int64(math.Float64bits(p.randSeed)))
 		p.replaceTop(num(prevSeed))
 
@@ -1129,7 +1125,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 
 	case compiler.BuiltinSubstr:
 		sValue, posValue := p.peekPop()
-		pos := int(posValue.num())
+		pos := int(posValue.toInt())
 		s := p.toString(sValue)
 		var substr string
 		if p.chars {
@@ -1148,8 +1144,8 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 
 	case compiler.BuiltinSubstrLength:
 		posValue, lengthValue := p.popTwo()
-		length := int(lengthValue.num())
-		pos := int(posValue.num())
+		length := int(lengthValue.toInt())
+		pos := int(posValue.toInt())
 		s := p.toString(p.peekTop())
 		var substr string
 		if p.chars {
@@ -1348,24 +1344,24 @@ func (p *interp) getline(redirect lexer.Token) (float64, string, error) {
 func (p *interp) augAssignOp(op compiler.AugOp, l, r value) (value, error) {
 	switch op {
 	case compiler.AugOpAdd:
-		return num(l.num() + r.num()), nil
+		return l.toNumber().add(r.toNumber()).toValue(), nil
 	case compiler.AugOpSub:
-		return num(l.num() - r.num()), nil
+		return l.toNumber().subtract(r.toNumber()).toValue(), nil
 	case compiler.AugOpMul:
-		return num(l.num() * r.num()), nil
+		return l.toNumber().multiply(r.toNumber()).toValue(), nil
 	case compiler.AugOpDiv:
-		rf := r.num()
-		if rf == 0.0 {
+		rf := r.toNumber()
+		if rf.isZero() {
 			return null(), newError("division by zero")
 		}
-		return num(l.num() / rf), nil
+		return l.toNumber().divide(rf).toValue(), nil
 	case compiler.AugOpPow:
-		return num(math.Pow(l.num(), r.num())), nil
+		return num(math.Pow(l.toFloat(), r.toFloat())), nil // XXX do we need to handle int case here?
 	default: // AugOpMod
-		rf := r.num()
-		if rf == 0.0 {
+		rf := r.toNumber()
+		if rf.isZero() {
 			return null(), newError("division by zero in mod")
 		}
-		return num(math.Mod(l.num(), rf)), nil
+		return l.toNumber().modulo(r.toNumber()).toValue(), nil
 	}
 }
