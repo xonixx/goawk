@@ -104,16 +104,16 @@ func (p *interp) resetCore() {
 	p.filename = null()
 	p.line = ""
 	p.lineIsTrueStr = false
-	p.lineNum = num(0)
-	p.fileLineNum = num(0)
+	p.lineNum = numInt(0)
+	p.fileLineNum = numInt(0)
 	p.fields = nil
 	p.fieldsIsTrueStr = nil
-	p.numFields = num(0)
+	p.numFields = numInt(0)
 	p.haveFields = false
 
-	p.matchStart = num(0)
-	p.matchLength = num(0)
-	p.argc = num(0)
+	p.matchStart = numInt(0)
+	p.matchLength = numInt(0)
+	p.argc = numInt(0)
 
 	p.exitStatus = 0
 }

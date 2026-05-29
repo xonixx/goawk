@@ -115,9 +115,11 @@ func fromNative(v reflect.Value) value {
 	case reflect.Bool:
 		return boolean(v.Bool())
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		return num(float64(v.Int()))
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		return num(float64(v.Uint()))
+		return numInt(v.Int())
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32:
+		return numInt(int64(v.Uint()))
+	case reflect.Uint64:
+		return num(float64(v.Uint())) // can overflow int64, therefore, float
 	case reflect.Float32, reflect.Float64:
 		return num(v.Float())
 	case reflect.String:

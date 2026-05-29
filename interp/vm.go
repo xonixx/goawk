@@ -710,7 +710,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			arrayIndex := code[ip+1]
 			ip += 2
 			array := p.array(resolver.Scope(arrayScope), int(arrayIndex))
-			p.push(num(float64(len(array))))
+			p.push(numInt(int64(len(array))))
 
 		case compiler.CallSplit:
 			arrayScope := code[ip]
@@ -721,7 +721,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			if err != nil {
 				return err
 			}
-			p.replaceTop(num(float64(n)))
+			p.replaceTop(numInt(int64(n)))
 
 		case compiler.CallSplitSep:
 			arrayScope := code[ip]
@@ -734,7 +734,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			if err != nil {
 				return err
 			}
-			p.replaceTop(num(float64(n)))
+			p.replaceTop(numInt(int64(n)))
 
 		case compiler.CallSprintf:
 			numArgs := code[ip]
@@ -885,7 +885,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			if ret == 1 {
 				p.setLine(line, false)
 			}
-			p.push(num(ret))
+			p.push(numInt(ret))
 
 		case compiler.GetlineField:
 			redirect := lexer.Token(code[ip])
@@ -901,7 +901,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 					return err
 				}
 			}
-			p.push(num(ret))
+			p.push(numInt(ret))
 
 		case compiler.GetlineGlobal:
 			redirect := lexer.Token(code[ip])
@@ -915,7 +915,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			if ret == 1 {
 				p.globals[index] = numStr(line)
 			}
-			p.push(num(ret))
+			p.push(numInt(ret))
 
 		case compiler.GetlineLocal:
 			redirect := lexer.Token(code[ip])
@@ -929,7 +929,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			if ret == 1 {
 				p.frame[index] = numStr(line)
 			}
-			p.push(num(ret))
+			p.push(numInt(ret))
 
 		case compiler.GetlineSpecial:
 			redirect := lexer.Token(code[ip])
@@ -946,7 +946,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 					return err
 				}
 			}
-			p.push(num(ret))
+			p.push(numInt(ret))
 
 		case compiler.GetlineArray:
 			redirect := lexer.Token(code[ip])
@@ -963,7 +963,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 				array := p.array(resolver.Scope(arrayScope), int(arrayIndex))
 				array[index] = numStr(line)
 			}
-			p.replaceTop(num(ret))
+			p.replaceTop(numInt(ret))
 		}
 	}
 
@@ -995,7 +995,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 		if err != nil {
 			p.printErrorf("error closing %q: %v\n", name, err)
 		}
-		p.replaceTop(num(float64(code)))
+		p.replaceTop(numInt(int64(code)))
 
 	case compiler.BuiltinCos:
 		p.replaceTop(num(math.Cos(p.peekTop().toFloat())))
@@ -1014,17 +1014,17 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 			ok = p.flushAll()
 		}
 		if !ok {
-			p.replaceTop(num(-1))
+			p.replaceTop(numInt(-1))
 		} else {
-			p.replaceTop(num(0))
+			p.replaceTop(numInt(0))
 		}
 
 	case compiler.BuiltinFflushAll:
 		ok := p.flushAll()
 		if !ok {
-			p.push(num(-1))
+			p.push(numInt(-1))
 		} else {
-			p.push(num(0))
+			p.push(numInt(0))
 		}
 
 	case compiler.BuiltinGsub:
@@ -1033,7 +1033,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 		if err != nil {
 			return err
 		}
-		p.replaceTwo(num(float64(n)), str(out))
+		p.replaceTwo(numInt(int64(n)), str(out))
 
 	case compiler.BuiltinIndex:
 		sValue, substr := p.peekPop()
@@ -1047,7 +1047,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 		} else {
 			awkIndex = index + 1
 		}
-		p.replaceTop(num(float64(awkIndex)))
+		p.replaceTop(numInt(int64(awkIndex)))
 
 	case compiler.BuiltinInt:
 		p.replaceTop(numInt(p.peekTop().toInt()))
@@ -1059,7 +1059,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 		} else {
 			length = len(p.line)
 		}
-		p.push(num(float64(length)))
+		p.push(numInt(int64(length)))
 
 	case compiler.BuiltinLengthArg:
 		s := p.toString(p.peekTop())
@@ -1069,7 +1069,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 		} else {
 			length = len(s)
 		}
-		p.replaceTop(num(float64(length)))
+		p.replaceTop(numInt(int64(length)))
 
 	case compiler.BuiltinLog:
 		p.replaceTop(num(math.Log(p.peekTop().toFloat())))
@@ -1083,14 +1083,14 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 		}
 		loc := re.FindStringIndex(s)
 		if loc == nil {
-			p.matchStart = num(0)
-			p.matchLength = num(-1)
+			p.matchStart = numInt(0)
+			p.matchLength = numInt(-1)
 		} else if p.chars {
-			p.matchStart = num(float64(utf8.RuneCountInString(s[:loc[0]]) + 1))
-			p.matchLength = num(float64(utf8.RuneCountInString(s[loc[0]:loc[1]])))
+			p.matchStart = numInt(int64(utf8.RuneCountInString(s[:loc[0]]) + 1))
+			p.matchLength = numInt(int64(utf8.RuneCountInString(s[loc[0]:loc[1]])))
 		} else {
-			p.matchStart = num(float64(loc[0] + 1))
-			p.matchLength = num(float64(loc[1] - loc[0]))
+			p.matchStart = numInt(int64(loc[0] + 1))
+			p.matchLength = numInt(int64(loc[1] - loc[0]))
 		}
 		p.replaceTop(p.matchStart)
 
@@ -1121,7 +1121,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 		if err != nil {
 			return err
 		}
-		p.replaceTwo(num(float64(n)), str(out))
+		p.replaceTwo(numInt(int64(n)), str(out))
 
 	case compiler.BuiltinSubstr:
 		sValue, posValue := p.peekPop()
@@ -1182,7 +1182,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 		if err != nil {
 			// Could not start the shell so skip waiting on it.
 			p.printErrorf("%v\n", err)
-			p.replaceTop(num(-1.0))
+			p.replaceTop(numInt(-1))
 			return nil
 		}
 		exitCode, err := waitExitCode(cmd)
@@ -1192,7 +1192,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 			}
 			p.printErrorf("%v\n", err)
 		}
-		p.replaceTop(num(float64(exitCode)))
+		p.replaceTop(numInt(int64(exitCode)))
 
 	case compiler.BuiltinTolower:
 		p.replaceTop(str(strings.ToLower(p.toString(p.peekTop()))))
@@ -1291,7 +1291,7 @@ func (p *interp) peekSlice(n int) []value {
 // Helper for getline operations. This performs the (possibly redirected) read
 // of a line, and returns the result. If the result is 1 (success in AWK), the
 // caller will set the target to the returned string.
-func (p *interp) getline(redirect lexer.Token) (float64, string, error) {
+func (p *interp) getline(redirect lexer.Token) (int64, string, error) {
 	switch redirect {
 	case lexer.PIPE: // redirect from command
 		name := p.toString(p.pop())

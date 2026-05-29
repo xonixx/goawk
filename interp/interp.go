@@ -139,7 +139,7 @@ type interp struct {
 	// Parsed program, compiled functions and constants
 	program   *parser.Program
 	functions []compiler.Function
-	nums      []float64
+	nums      []float64 // TODO but we should keep int64 too
 	strs      []string
 	regexes   []*regexp.Regexp
 
@@ -420,11 +420,11 @@ func newInterp(program *parser.Program) *interp {
 	p.outputFieldSep = " "
 	p.outputRecordSep = "\n"
 	p.subscriptSep = "\x1c"
-	p.lineNum = num(0)
-	p.fileLineNum = num(0)
-	p.numFields = num(0)
-	p.matchStart = num(0)
-	p.matchLength = num(0)
+	p.lineNum = numInt(0)
+	p.fileLineNum = numInt(0)
+	p.numFields = numInt(0)
+	p.matchStart = numInt(0)
+	p.matchLength = numInt(0)
 	// p.argc is initialized in setExecuteConfig based on config.Args
 
 	p.inputStreams = make(map[string]inputStream)
@@ -482,7 +482,7 @@ func (p *interp) setExecuteConfig(config *Config) error {
 	// Set up ARGV and other variables from config
 	argvIndex := p.arrayIndexes["ARGV"]
 	p.setArrayValue(resolver.Global, argvIndex, "0", str(config.Argv0))
-	p.argc = num(float64(len(config.Args) + 1))
+	p.argc = numInt(int64(len(config.Args) + 1))
 	for i, arg := range config.Args {
 		p.setArrayValue(resolver.Global, argvIndex, strconv.Itoa(i+1), numStr(arg))
 	}
@@ -999,7 +999,7 @@ func (p *interp) setField(index int, value string) error {
 	}
 	p.fields[index-1] = value
 	p.fieldsIsTrueStr[index-1] = true
-	p.numFields = num(float64(len(p.fields)))
+	p.numFields = numInt(int64(len(p.fields)))
 	p.line = p.joinFields(p.fields)
 	p.lineIsTrueStr = true
 	return nil

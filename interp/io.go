@@ -623,7 +623,7 @@ func nextRune(b []byte) rune {
 // Setup for a new input file with given name (empty string if stdin)
 func (p *interp) setFile(filename string) {
 	p.filename = numStr(filename)
-	p.fileLineNum = num(0)
+	p.fileLineNum = numInt(0)
 	p.hadFiles = true
 }
 
@@ -717,7 +717,7 @@ func (p *interp) ensureFields() {
 	for range p.fields {
 		p.fieldsIsTrueStr = append(p.fieldsIsTrueStr, false)
 	}
-	p.numFields = num(float64(len(p.fields)))
+	p.numFields = numInt(int64(len(p.fields)))
 }
 
 // Fetch next line (record) of input from current input file, opening
