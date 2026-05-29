@@ -33,7 +33,7 @@ func null() value {
 }
 
 // Create a new number value
-func num(n float64) value { // TODO replace all num(0) usage to int
+func num(n float64) value {
 	return value{typ: typeNum, n: n}
 }
 
@@ -114,30 +114,6 @@ func (v value) boolean() bool {
 	}
 }
 
-/*// Like strconv.ParseFloat, but allow hex floating point without exponent, and
-// allow "+nan" and "-nan" (though they both return math.NaN()). Also disallow
-// underscore digit separators.
-func parseFloat(s string) (float64, error) {
-	s = strings.TrimSpace(s)
-	if len(s) > 1 && (s[0] == '+' || s[0] == '-') {
-		if len(s) == 4 && hasNaNPrefix(s[1:]) {
-			// ParseFloat doesn't handle "nan" with sign prefix, so handle it here.
-			return math.NaN(), nil
-		}
-		if len(s) > 3 && hasHexPrefix(s[1:]) && strings.IndexAny(s, "pP") < 0 {
-			s += "p0"
-		}
-	} else if len(s) > 2 && hasHexPrefix(s) && strings.IndexAny(s, "pP") < 0 {
-		s += "p0"
-	}
-	n, err := strconv.ParseFloat(s, 64)
-	if err == nil && strings.IndexByte(s, '_') >= 0 {
-		// Underscore separators aren't supported by AWK.
-		return 0, strconv.ErrSyntax
-	} // TODO allow
-	return n, err
-}*/
-
 // Tries to parse a string as an integer number, otherwise as float.
 // For floats is like strconv.ParseFloat, but allow hex floating point without exponent, and
 // allow "+nan" and "-nan" (though they both return math.NaN()). Also disallow
@@ -215,17 +191,6 @@ func (v value) toNumber() number {
 		return numberFloat(v.n)
 	}
 }
-
-/*// deprecated: use toNumber()
-func (v value) num() float64 { // TODO switch to toNumber() above
-	switch v.typ {
-	case typeStr, typeNumStr:
-		// Ensure string starts with a float and convert it
-		return parseNumberPrefix(v.s).toFloat()
-	default: // typeNum, typeNull
-		return v.n
-	}
-}*/
 
 // Return value's int64 number value, converting from string if necessary
 func (v value) toInt() int64 {

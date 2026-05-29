@@ -64,6 +64,7 @@ func Walk(v Visitor, node Node) {
 		Walk(v, n.False)
 
 	case *NumExpr: // leaf
+	case *NumIntExpr: // leaf
 	case *StrExpr: // leaf
 	case *RegExpr: // leaf
 	case *VarExpr: // leaf
