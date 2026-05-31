@@ -307,6 +307,15 @@ func (n number) divide(a number) number {
 	return numberFloat(n.f / a.f)
 }
 
+// value divide
+// this needs special backward-compatible handling (ex.: $3/=2)
+func (n value) divide(a value) number {
+	if n.typ == typeNumStr || a.typ == typeNumStr {
+		return numberFloat(n.toFloat() / a.toFloat())
+	}
+	return n.toNumber().divide(a.toNumber())
+}
+
 // number modulo
 func (n number) modulo(a number) number {
 	if n.typ != a.typ {

@@ -244,18 +244,18 @@ function AddNums(n,   sum,i) {
   *ast.ExprStmt [2:3-2:10)
    *ast.AssignExpr
     *ast.VarExpr
-    *ast.NumExpr
+    *ast.NumIntExpr
   *ast.IfStmt [3:3-12:3)
    *ast.BinaryExpr
     *ast.BinaryExpr
      *ast.VarExpr
-     *ast.NumExpr
-    *ast.NumExpr
+     *ast.NumIntExpr
+    *ast.NumIntExpr
    *ast.ForStmt [4:5-6:6)
     *ast.ExprStmt [4:10-4:15)
      *ast.AssignExpr
       *ast.VarExpr
-      *ast.NumExpr
+      *ast.NumIntExpr
     *ast.BinaryExpr
      *ast.VarExpr
      *ast.VarExpr
@@ -267,26 +267,26 @@ function AddNums(n,   sum,i) {
       *ast.VarExpr
       *ast.BinaryExpr
        *ast.VarExpr
-       *ast.NumExpr
+       *ast.NumIntExpr
    *ast.IfStmt [7:10-11:4)
     *ast.BinaryExpr
      *ast.BinaryExpr
       *ast.VarExpr
-      *ast.NumExpr
-     *ast.NumExpr
+      *ast.NumIntExpr
+     *ast.NumIntExpr
     *ast.PrintStmt [8:5-8:25)
      *ast.StrExpr
     *ast.ExprStmt [10:5-10:13)
      *ast.AssignExpr
       *ast.VarExpr
       *ast.UnaryExpr
-       *ast.NumExpr
+       *ast.NumIntExpr
   *ast.WhileStmt [12:3-12:41)
-   *ast.NumExpr
+   *ast.NumIntExpr
    *ast.DoWhileStmt [12:14-12:40)
     *ast.PrintStmt [12:19-12:29)
-     *ast.NumExpr
-    *ast.NumExpr
+     *ast.NumIntExpr
+    *ast.NumIntExpr
   *ast.ReturnStmt [13:3-13:13)
    *ast.VarExpr
 `)

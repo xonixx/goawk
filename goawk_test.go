@@ -655,13 +655,13 @@ $1 {
     print 1 + 1
 }
 `[1:], ""},
-		{[]string{"-da", `$1 { print 1+1 }`}, "", `
+		{[]string{"-da", `$1 { print 1.1+1.1 }`}, "", `
         // pattern
 0000    FieldInt 1
 
         // { body }
-0000    Num 1 (0)
-0002    Num 1 (0)
+0000    Num 1.1 (0)
+0002    Num 1.1 (0)
 0004    Add
 0005    Print 1
 
@@ -674,8 +674,8 @@ $1 {
 0000    FieldInt 1
 
         // { body }
-0000    Num 1 (0)
-0002    Num 1 (0)
+0000    Int 1 (0)
+0002    Int 1 (0)
 0004    Add
 0005    Print 1
 

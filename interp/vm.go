@@ -366,7 +366,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			if rf.isZero() {
 				return newError("division by zero")
 			}
-			p.replaceTop(l.toNumber().divide(r.toNumber()).toValue())
+			p.replaceTop(l.divide(r).toValue())
 
 		case compiler.Power:
 			l, r := p.peekPop()
@@ -376,7 +376,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			l, r := p.peekPop()
 			rf := r.toNumber()
 			if rf.isZero() {
-				return newError("division by zero")
+				return newError("division by zero in mod")
 			}
 			p.replaceTop(l.toNumber().modulo(r.toNumber()).toValue())
 
@@ -1354,7 +1354,7 @@ func (p *interp) augAssignOp(op compiler.AugOp, l, r value) (value, error) {
 		if rf.isZero() {
 			return null(), newError("division by zero")
 		}
-		return l.toNumber().divide(rf).toValue(), nil
+		return l.divide(r).toValue(), nil
 	case compiler.AugOpPow:
 		return num(math.Pow(l.toFloat(), r.toFloat())), nil // XXX do we need to handle int case here?
 	default: // AugOpMod
