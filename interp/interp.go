@@ -139,7 +139,7 @@ type interp struct {
 	// Parsed program, compiled functions and constants
 	program   *parser.Program
 	functions []compiler.Function
-	nums      []float64 // TODO but we should keep int64 too
+	nums      []number
 	strs      []string
 	regexes   []*regexp.Regexp
 
@@ -384,9 +384,18 @@ func newInterp(program *parser.Program) *interp {
 	p := &interp{
 		program:   program,
 		functions: program.Compiled.Functions,
-		nums:      program.Compiled.Nums,
+		nums:      make([]number, len(program.Compiled.NumTypes)),
 		strs:      program.Compiled.Strs,
 		regexes:   program.Compiled.Regexes,
+	}
+
+	for i := range program.Compiled.NumTypes {
+		numType := program.Compiled.NumTypes[i]
+		if numType == compiler.NumFloat {
+			p.nums[i] = numberFloat(program.Compiled.Nums[i])
+		} else { // NumInt
+			p.nums[i] = numberInt(program.Compiled.Ints[i])
+		}
 	}
 
 	// Allocate memory for variables and virtual machine stack

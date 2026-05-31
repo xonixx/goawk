@@ -43,7 +43,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 		case compiler.Num:
 			index := code[ip]
 			ip++
-			p.push(num(p.nums[index]))
+			p.push(p.nums[index].toValue())
 
 		case compiler.Str:
 			index := code[ip]

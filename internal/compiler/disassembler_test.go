@@ -24,6 +24,8 @@ func TestDisassembler(t *testing.T) {
 					},
 				},
 				Nums:            []float64{0},
+				Ints:            []int64{0},
+				NumTypes:        []NumType{NumFloat},
 				Strs:            []string{""},
 				Regexes:         []*regexp.Regexp{regexp.MustCompile("")},
 				scalarNames:     []string{"s"},

@@ -12,13 +12,22 @@ import (
 	"github.com/benhoyt/goawk/lexer"
 )
 
+type NumType int8
+
+const (
+	NumFloat NumType = iota
+	NumInt
+)
+
 // Program holds an entire compiled program.
 type Program struct {
 	Begin     []Opcode
 	Actions   []Action
 	End       []Opcode
 	Functions []Function
+	NumTypes  []NumType
 	Nums      []float64
+	Ints      []int64
 	Strs      []string
 	Regexes   []*regexp.Regexp
 
@@ -72,6 +81,7 @@ func Compile(resolved *resolver.ResolvedProgram) (compiledProg *Program, err err
 	// Reuse identical constants across entire program.
 	indexes := constantIndexes{
 		nums:    make(map[float64]int),
+		ints:    make(map[int64]int),
 		strs:    make(map[string]int),
 		regexes: make(map[string]int),
 	}
@@ -193,6 +203,7 @@ func Compile(resolved *resolver.ResolvedProgram) (compiledProg *Program, err err
 // So we can look up the indexes of constants that have been used before.
 type constantIndexes struct {
 	nums    map[float64]int
+	ints    map[int64]int
 	strs    map[string]int
 	regexes map[string]int
 }
@@ -668,7 +679,7 @@ func (c *compiler) expr(expr ast.Expr) {
 	case *ast.NumExpr:
 		c.add(Num, opcodeInt(c.numIndex(e.Value)))
 	case *ast.NumIntExpr:
-		c.add(Num, opcodeInt(c.numIndex(float64(e.Value)))) // TODO impl
+		c.add(Num, opcodeInt(c.intIndex(e.Value)))
 
 	case *ast.StrExpr:
 		c.add(Str, opcodeInt(c.strIndex(e.Value)))
@@ -1078,7 +1089,22 @@ func (c *compiler) numIndex(n float64) int {
 	}
 	index := len(c.program.Nums)
 	c.program.Nums = append(c.program.Nums, n)
+	c.program.NumTypes = append(c.program.NumTypes, NumFloat)
+	c.program.Ints = append(c.program.Ints, 0) // make sure Nums & Ints same size
 	c.indexes.nums[n] = index
+	return index
+}
+
+// Add (or reuse) an int constant and returns its index.
+func (c *compiler) intIndex(n int64) int {
+	if index, ok := c.indexes.ints[n]; ok {
+		return index // reuse existing constant
+	}
+	index := len(c.program.Ints)
+	c.program.Ints = append(c.program.Ints, n)
+	c.program.NumTypes = append(c.program.NumTypes, NumInt)
+	c.program.Nums = append(c.program.Nums, 0) // make sure Nums & Ints same size
+	c.indexes.ints[n] = index
 	return index
 }
 
