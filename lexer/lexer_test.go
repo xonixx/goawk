@@ -25,7 +25,7 @@ func TestLexer(t *testing.T) {
 		// Names and keywords
 		{"x", `1:1 name "x"`},
 		{"x y0", `1:1 name "x", 1:3 name "y0"`},
-		{"x 0y", `1:1 name "x", 1:3 number_i64 "0", 1:4 name "y"`},
+		{"x 0y", `1:1 name "x", 1:3 int "0", 1:4 name "y"`},
 		{"sub SUB", `1:1 sub "", 1:5 name "SUB"`},
 
 		// String tokens
@@ -48,11 +48,11 @@ func TestLexer(t *testing.T) {
 		{`"\uffffffffg"`, `1:12 <illegal> "invalid Unicode character"`},
 
 		// Number tokens
-		{"0", `1:1 number_i64 "0"`},
-		{"9", `1:1 number_i64 "9"`},
-		{" 0 ", `1:2 number_i64 "0"`},
-		{"\n  1", `1:1 <newline> "", 2:3 number_i64 "1"`},
-		{"1234", `1:1 number_i64 "1234"`},
+		{"0", `1:1 int "0"`},
+		{"9", `1:1 int "9"`},
+		{" 0 ", `1:2 int "0"`},
+		{"\n  1", `1:1 <newline> "", 2:3 int "1"`},
+		{"1234", `1:1 int "1234"`},
 		{".5", `1:1 number ".5"`},
 		{".5e1", `1:1 number ".5e1"`},
 		{"5e+1", `1:1 number "5e+1"`},
@@ -67,7 +67,7 @@ func TestLexer(t *testing.T) {
 		{"1e3.4", `1:1 number "1e3", 1:4 number ".4"`},
 		{"1e-", `1:1 number "1", 1:2 name "e", 1:3 - ""`},
 		{"1e+", `1:1 number "1", 1:2 name "e", 1:3 + ""`},
-		{"42`", `1:1 number_i64 "42", 1:3 <illegal> "unexpected char"`},
+		{"42`", `1:1 int "42", 1:3 <illegal> "unexpected char"`},
 		{"0..", `1:1 number "0.", 1:4 <illegal> "expected digits"`},
 		{".", `1:2 <illegal> "expected digits"`},
 
@@ -256,7 +256,7 @@ func TestAllTokens(t *testing.T) {
 		"for function getline if in next nextfile print printf return while " +
 		"atan2 close cos exp fflush gsub index int length log match rand " +
 		"sin split sprintf sqrt srand sub substr system tolower toupper " +
-		"name string number number_i64 <newline> " +
+		"name string number int <newline> " +
 		"<illegal> <illegal> EOF"
 	if output != expected {
 		t.Errorf("expected %q, got %q", expected, output)
@@ -400,10 +400,10 @@ func Example() {
 	}
 	// Output:
 	// 1:1 $ ""
-	// 1:2 number_i64 "0"
+	// 1:2 int "0"
 	// 1:4 { ""
 	// 1:6 print ""
 	// 1:12 $ ""
-	// 1:13 number_i64 "1"
+	// 1:13 int "1"
 	// 1:15 } ""
 }

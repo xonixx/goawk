@@ -683,7 +683,7 @@ func (p *parser) _compare(ops ...lexer.Token) ast.Expr {
 
 func (p *parser) concat() ast.Expr {
 	expr := p.add()
-	for p.matches(lexer.DOLLAR, lexer.AT, lexer.NOT, lexer.NAME, lexer.NUMBER, lexer.NUMBER_I64, lexer.STRING, lexer.LPAREN, lexer.INCR, lexer.DECR) ||
+	for p.matches(lexer.DOLLAR, lexer.AT, lexer.NOT, lexer.NAME, lexer.NUMBER, lexer.INT, lexer.STRING, lexer.LPAREN, lexer.INCR, lexer.DECR) ||
 		p.tok >= lexer.FIRST_FUNC && p.tok <= lexer.LAST_FUNC {
 		right := p.add()
 		expr = &ast.BinaryExpr{Left: expr, Op: lexer.CONCAT, Right: right}
@@ -736,7 +736,7 @@ func (p *parser) primary() ast.Expr {
 		n, _ := strconv.ParseFloat(s, 64)
 		p.next()
 		return &ast.NumExpr{Value: n}
-	case lexer.NUMBER_I64:
+	case lexer.INT:
 		// AWK allows forms like "1.5e", but ParseInt doesn't
 		s := strings.TrimRight(p.val, "eE")
 		n, _ := strconv.ParseInt(s, 10, 64)

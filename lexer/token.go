@@ -105,7 +105,7 @@ const (
 
 	NAME
 	NUMBER
-	NUMBER_I64
+	INT
 	STRING
 	REGEX
 
@@ -255,11 +255,11 @@ var tokenNames = map[Token]string{
 	F_TOLOWER: "tolower",
 	F_TOUPPER: "toupper",
 
-	NAME:       "name",
-	NUMBER:     "number",
-	NUMBER_I64: "number_i64",
-	STRING:     "string",
-	REGEX:      "regex",
+	NAME:   "name",
+	NUMBER: "number",
+	INT:    "int",
+	STRING: "string",
+	REGEX:  "regex",
 }
 
 // String returns the string name of this token.

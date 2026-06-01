@@ -60,7 +60,7 @@ func (l *Lexer) HadSpace() bool {
 // Scan scans the next token and returns its position (line/column),
 // token value (one of the uppercase token constants), and the
 // string value of the token. For most tokens, the token value is
-// empty. For NAME, NUMBER, NUMBER_I64, STRING, and REGEX tokens, it's the
+// empty. For NAME, NUMBER, INT, STRING, and REGEX tokens, it's the
 // token's value. For an ILLEGAL token, it's the error message.
 func (l *Lexer) Scan() (Position, Token, string) {
 	pos, tok, val := l.scan()
@@ -177,7 +177,7 @@ func (l *Lexer) scan() (Position, Token, string) {
 		}
 		tok = NUMBER
 		if !gotDot && !gotE {
-			tok = NUMBER_I64
+			tok = INT
 		}
 		val = string(l.src[start : l.offset-1])
 	case '{':
