@@ -134,6 +134,7 @@ const (
 	precOr
 	precAnd
 	precIn
+	precBitAnd
 	precMatch
 	precCompare
 	precConcat
@@ -189,6 +190,8 @@ func (e *BinaryExpr) precedence() int {
 		return precMul
 	case lexer.EQUALS, lexer.LESS, lexer.LTE, lexer.GREATER, lexer.GTE, lexer.NOT_EQUALS:
 		return precCompare
+	case lexer.BITAND:
+		return precBitAnd
 	case lexer.MATCH, lexer.NOT_MATCH:
 		return precMatch
 	case lexer.POW:

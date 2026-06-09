@@ -284,10 +284,7 @@ func (l *Lexer) scan() (Position, Token, string) {
 	case ':':
 		tok = COLON
 	case '&':
-		tok = l.choice('&', ILLEGAL, AND)
-		if tok == ILLEGAL {
-			return l.pos, ILLEGAL, "unexpected char after '&'"
-		}
+		tok = l.choice('&', BITAND, AND)
 	case '|':
 		tok = l.choice('|', PIPE, OR)
 	default:

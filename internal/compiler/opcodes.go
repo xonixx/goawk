@@ -89,6 +89,7 @@ const (
 	LessOrEqual
 	GreaterOrEqual
 	Concat
+	BitAnd
 	Match
 	NotMatch
 
