@@ -623,9 +623,15 @@ func (p *parser) printOr() ast.Expr { return p.binaryLeft(p.printAnd, true, lexe
 
 // Parse an && and expression:
 //
-//	in [AND NEWLINE* in] [AND NEWLINE* in] ...
-func (p *parser) and() ast.Expr      { return p.binaryLeft(p.in, true, lexer.AND) }
-func (p *parser) printAnd() ast.Expr { return p.binaryLeft(p.printIn, true, lexer.AND) }
+//	bitand [AND NEWLINE* bitand] [AND NEWLINE* bitand] ...
+func (p *parser) and() ast.Expr      { return p.binaryLeft(p.bitAnd, true, lexer.AND) }
+func (p *parser) printAnd() ast.Expr { return p.binaryLeft(p.printBitAnd, true, lexer.AND) }
+
+// Parse a & bitand expression:
+//
+//	in [BITAND NEWLINE* in] [BITAND NEWLINE* in] ...
+func (p *parser) bitAnd() ast.Expr      { return p.binaryLeft(p.in, true, lexer.BITAND) }
+func (p *parser) printBitAnd() ast.Expr { return p.binaryLeft(p.printIn, true, lexer.BITAND) }
 
 // Parse an "in" expression:
 //

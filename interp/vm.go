@@ -368,6 +368,10 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			}
 			p.replaceTop(l.divide(r).toValue())
 
+		case compiler.BitAnd:
+			l, r := p.peekPop()
+			p.replaceTop(numInt(l.toInt() & r.toInt()))
+
 		case compiler.Power:
 			l, r := p.peekPop()
 			p.replaceTop(num(math.Pow(l.toFloat(), r.toFloat())))

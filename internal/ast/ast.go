@@ -133,8 +133,8 @@ const (
 	precCond
 	precOr
 	precAnd
-	precIn
 	precBitAnd
+	precIn
 	precMatch
 	precCompare
 	precConcat
