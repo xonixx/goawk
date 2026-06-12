@@ -110,6 +110,8 @@ const (
 	STRING
 	REGEX
 
+	BITOR = PIPE
+
 	LAST       = REGEX
 	FIRST_FUNC = F_ATAN2
 	LAST_FUNC  = F_TOUPPER
@@ -203,7 +205,7 @@ var tokenNames = map[Token]string{
 	NOT:        "!",
 	NOT_EQUALS: "!=",
 	OR:         "||",
-	PIPE:       "|",
+	PIPE:       "|", // same as BITOR
 	POW:        "^",
 	POW_ASSIGN: "^=",
 	QUESTION:   "?",
