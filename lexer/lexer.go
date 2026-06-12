@@ -68,6 +68,15 @@ func (l *Lexer) Scan() (Position, Token, string) {
 	return pos, tok, val
 }
 
+func (l *Lexer) HasGetlineAhead() bool {
+	i := l.offset - 1
+	// iterate l.src while whitespace
+	for i < len(l.src) && (l.src[i] == ' ' || l.src[i] == '\t') {
+		i++
+	}
+	return i+7 < len(l.src) && l.src[i] == 'g' && l.src[i+1] == 'e' && l.src[i+2] == 't' && l.src[i+3] == 'l' && l.src[i+4] == 'i' && l.src[i+5] == 'n' && l.src[i+6] == 'e'
+}
+
 // Does the real work of scanning. Scan() wraps this to more easily
 // set lastTok.
 func (l *Lexer) scan() (Position, Token, string) {
