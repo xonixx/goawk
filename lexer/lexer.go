@@ -68,13 +68,21 @@ func (l *Lexer) Scan() (Position, Token, string) {
 	return pos, tok, val
 }
 
-func (l *Lexer) HasGetlineAhead() bool {
-	i := l.offset - 1
-	// iterate l.src while whitespace
-	for i < len(l.src) && (l.src[i] == ' ' || l.src[i] == '\t') {
-		i++
-	}
-	return i+7 < len(l.src) && l.src[i] == 'g' && l.src[i+1] == 'e' && l.src[i+2] == 't' && l.src[i+3] == 'l' && l.src[i+4] == 'i' && l.src[i+5] == 'n' && l.src[i+6] == 'e'
+// PeekToken looks at the next token without consuming it.
+func (l *Lexer) PeekToken() Token {
+	keepLexer := *l
+
+	_, tok, _ := l.scan()
+
+	// restore the lexer to its original state
+	l.offset = keepLexer.offset
+	l.ch = keepLexer.ch
+	l.pos = keepLexer.pos
+	l.nextPos = keepLexer.nextPos
+	l.hadSpace = keepLexer.hadSpace
+	l.lastTok = keepLexer.lastTok
+
+	return tok
 }
 
 // Does the real work of scanning. Scan() wraps this to more easily

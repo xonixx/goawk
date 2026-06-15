@@ -1018,7 +1018,7 @@ func (p *parser) binaryLeft(higher func() ast.Expr, allowNewline bool, ops ...le
 	expr := higher()
 	for p.matches(ops...) {
 		op := p.tok
-		if op == lexer.PIPE && p.lexer.HasGetlineAhead() {
+		if op == lexer.PIPE && p.lexer.PeekToken() == lexer.GETLINE {
 			return expr
 		}
 		p.next()
