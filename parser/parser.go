@@ -625,14 +625,20 @@ func (p *parser) printOr() ast.Expr { return p.binaryLeft(p.printAnd, true, lexe
 //
 //	bitor [AND NEWLINE* bitor] [AND NEWLINE* bitor] ...
 func (p *parser) and() ast.Expr      { return p.binaryLeft(p.bitOr, true, lexer.AND) }
-func (p *parser) printAnd() ast.Expr { return p.binaryLeft(p.printBitAnd, true, lexer.AND) }
+func (p *parser) printAnd() ast.Expr { return p.binaryLeft(p.printBitXor, true, lexer.AND) }
 
-// Parse a & bitand expression:
+// Parse a | bitor expression:
 //
-//	bitand [BITOR NEWLINE* bitand] [BITOR NEWLINE* bitand] ...
-func (p *parser) bitOr() ast.Expr { return p.binaryLeft(p.bitAnd, true, lexer.BITOR) }
+//	bitxor [BITOR NEWLINE* bitxor] [BITOR NEWLINE* bitxor] ...
+//
+// We won't parse | in print due to conflict with `print a | script` syntax
+func (p *parser) bitOr() ast.Expr { return p.binaryLeft(p.bitXor, true, lexer.BITOR) }
 
-//func (p *parser) printBitOr() ast.Expr { return p.binaryLeft(p.printBitAnd, true, lexer.BITOR) }
+// Parse a ^ bitxor expression:
+//
+//	bitand [BITXOR NEWLINE* bitand] [BITXOR NEWLINE* bitand] ...
+func (p *parser) bitXor() ast.Expr      { return p.binaryLeft(p.bitAnd, true, lexer.BITXOR) }
+func (p *parser) printBitXor() ast.Expr { return p.binaryLeft(p.printBitAnd, true, lexer.BITXOR) }
 
 // Parse a & bitand expression:
 //

@@ -372,6 +372,10 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			l, r := p.peekPop()
 			p.replaceTop(numInt(l.toInt() & r.toInt()))
 
+		case compiler.BitXor:
+			l, r := p.peekPop()
+			p.replaceTop(numInt(l.toInt() ^ r.toInt()))
+
 		case compiler.BitOr:
 			l, r := p.peekPop()
 			p.replaceTop(numInt(l.toInt() | r.toInt()))

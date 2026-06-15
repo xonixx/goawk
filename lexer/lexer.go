@@ -274,7 +274,7 @@ func (l *Lexer) scan() (Position, Token, string) {
 	case '\n':
 		tok = NEWLINE
 	case '^':
-		tok = l.choice('=', POW, POW_ASSIGN)
+		tok = l.choice('=', BITXOR, POW_ASSIGN) // TODO xor_assign
 	case '!':
 		switch l.ch {
 		case '=':

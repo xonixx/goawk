@@ -90,6 +90,7 @@ const (
 	GreaterOrEqual
 	Concat
 	BitAnd
+	BitXor
 	BitOr
 	Match
 	NotMatch

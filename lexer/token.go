@@ -20,6 +20,7 @@ const (
 	ASSIGN
 	AT
 	BITAND // &
+	BITXOR // ^
 	COLON
 	COMMA
 	DECR
@@ -181,6 +182,7 @@ var tokenNames = map[Token]string{
 	ASSIGN:     "=",
 	AT:         "@",
 	BITAND:     "&",
+	BITXOR:     "^",
 	COLON:      ":",
 	COMMA:      ",",
 	DECR:       "--",
@@ -206,8 +208,8 @@ var tokenNames = map[Token]string{
 	NOT_EQUALS: "!=",
 	OR:         "||",
 	PIPE:       "|", // same as BITOR
-	POW:        "^",
-	POW_ASSIGN: "^=",
+	POW:        "**",
+	POW_ASSIGN: "**=",
 	QUESTION:   "?",
 	RBRACE:     "}",
 	RBRACKET:   "]",
