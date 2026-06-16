@@ -213,10 +213,11 @@ BEGIN {
 	{`BEGIN { a["x"] = 3; a["y"] = 4; delete a; for (k in a) print k, a[k] }`, "", "", "", ""},
 	{`function f(a) { print "x" in a, "y" in a }  BEGIN { b["x"] = 3; f(b) }`, "", "1 0\n", "", ""},
 
-	// Unary expressions: ! + -
+	// Unary expressions: ! + - ~
 	{`BEGIN { print !42, !1, !0, !!42, !!1, !!0 }`, "", "0 0 1 1 1 0\n", "", ""},
 	{`BEGIN { print !42, !1, !0, !!42, !!1, !!0 }`, "", "0 0 1 1 1 0\n", "", ""},
 	{`BEGIN { print +4, +"3", +0, +-3, -3, - -4, -"3" }`, "", "4 3 0 -3 -3 4 -3\n", "", ""},
+	{`BEGIN { print ~5, ~5.5, ~~5, ~~-5.5, ~-3 } # !posix !gawk`, "", "-6 -6 5 -5 2\n", "", ""},
 	{`BEGIN { $0="0"; print !$0 }`, "", "0\n", "", ""},
 	{`BEGIN { $0="1"; print !$0 }`, "", "0\n", "", ""},
 	{`{ print !$0 }`, "0\n", "1\n", "", ""},

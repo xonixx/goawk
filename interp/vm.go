@@ -518,6 +518,9 @@ func (p *interp) execute(code []compiler.Opcode) error {
 		case compiler.UnaryPlus:
 			p.replaceTop(p.peekTop().toNumber().toValue())
 
+		case compiler.BitNot:
+			p.replaceTop(numInt(^p.peekTop().toNumber().toInt()))
+
 		case compiler.Boolean:
 			p.replaceTop(boolean(p.peekTop().boolean()))
 

@@ -97,6 +97,7 @@ const (
 
 	// Unary operators
 	Not
+	BitNot
 	UnaryMinus
 	UnaryPlus
 	Boolean

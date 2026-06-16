@@ -942,6 +942,8 @@ func (c *compiler) expr(expr ast.Expr) {
 			c.add(UnaryMinus)
 		case lexer.NOT:
 			c.add(Not)
+		case lexer.BITNOT:
+			c.add(BitNot)
 		default: // ADD
 			c.add(UnaryPlus)
 		}

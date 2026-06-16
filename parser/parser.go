@@ -785,7 +785,7 @@ func (p *parser) primary() ast.Expr {
 	case lexer.AT:
 		p.next()
 		return &ast.NamedFieldExpr{Field: p.primary()}
-	case lexer.NOT, lexer.ADD, lexer.SUB:
+	case lexer.NOT, lexer.ADD, lexer.SUB, lexer.BITNOT:
 		op := p.tok
 		p.next()
 		return &ast.UnaryExpr{Op: op, Value: p.pow()}
