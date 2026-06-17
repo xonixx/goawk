@@ -192,16 +192,6 @@ func (v value) toNumber() number {
 	}
 }
 
-// Return value's int64 number value, converting from string if necessary
-func (v value) toInt() int64 {
-	return v.toNumber().toInt()
-}
-
-// Return value's float64 number value, converting from string if necessary
-func (v value) toFloat() float64 {
-	return v.toNumber().toFloat()
-}
-
 type numberType uint8
 
 const (
@@ -311,7 +301,7 @@ func (n number) divide(a number) number {
 // this needs special backward-compatible handling (ex.: $3/=2)
 func (n value) divide(a value) number {
 	if n.typ == typeNumStr || a.typ == typeNumStr {
-		return numberFloat(n.toFloat() / a.toFloat())
+		return numberFloat(n.toNumber().toFloat() / a.toNumber().toFloat())
 	}
 	return n.toNumber().divide(a.toNumber())
 }

@@ -18,4 +18,4 @@ We need to implement operators:
 - [x] `<<` - left shift
 - [x] `>>` - right shift
   - we have a clash with AWK's print-to-file redirection `print items >> output-file`. But somehow this is not a problem for `>`.
-- [ ] `&= ^= |= <<= >>=`
+- [x] `&= ^= |= <<= >>=`

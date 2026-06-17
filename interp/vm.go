@@ -68,7 +68,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.Field:
 			index := p.peekTop()
-			v := p.getField(int(index.toInt()))
+			v := p.getField(int(index.toNumber().toInt()))
 			p.replaceTop(v)
 
 		case compiler.FieldInt:
@@ -144,7 +144,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.AssignField:
 			right, index := p.popTwo()
-			err := p.setField(int(index.toInt()), p.toString(right))
+			err := p.setField(int(index.toNumber().toInt()), p.toString(right))
 			if err != nil {
 				return err
 			}
@@ -154,8 +154,8 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			// substitution (n>0), to avoid rebuilding $0 in that case.
 			right, index := p.popTwo()
 			n := p.peekTop()
-			if n.toInt() > 0 { // TODO check
-				err := p.setField(int(index.toInt()), p.toString(right))
+			if n.toNumber().toInt() > 0 { // TODO check
+				err := p.setField(int(index.toNumber().toInt()), p.toString(right))
 				if err != nil {
 					return err
 				}
@@ -213,7 +213,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 		case compiler.IncrField:
 			amount := code[ip]
 			ip++
-			index := int(p.pop().toInt())
+			index := int(p.pop().toNumber().toInt())
 			v := p.getField(index)
 			err := p.setField(index, p.toString(v.toNumber().add(numberInt(int64(amount))).toValue()))
 			if err != nil {
@@ -262,7 +262,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			operation := compiler.AugOp(code[ip])
 			ip++
 			right, indexVal := p.popTwo()
-			index := int(indexVal.toInt())
+			index := int(indexVal.toNumber().toInt())
 			field := p.getField(index)
 			v, err := p.augAssignOp(operation, field, right)
 			if err != nil {
@@ -370,27 +370,27 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.BitAnd:
 			l, r := p.peekPop()
-			p.replaceTop(numInt(l.toInt() & r.toInt()))
+			p.replaceTop(numInt(l.toNumber().toInt() & r.toNumber().toInt()))
 
 		case compiler.BitXor:
 			l, r := p.peekPop()
-			p.replaceTop(numInt(l.toInt() ^ r.toInt()))
+			p.replaceTop(numInt(l.toNumber().toInt() ^ r.toNumber().toInt()))
 
 		case compiler.BitOr:
 			l, r := p.peekPop()
-			p.replaceTop(numInt(l.toInt() | r.toInt()))
+			p.replaceTop(numInt(l.toNumber().toInt() | r.toNumber().toInt()))
 
 		case compiler.BitLeftShift:
 			l, r := p.peekPop()
-			p.replaceTop(numInt(l.toInt() << r.toInt()))
+			p.replaceTop(numInt(l.toNumber().toInt() << r.toNumber().toInt()))
 
 		case compiler.BitRightShift:
 			l, r := p.peekPop()
-			p.replaceTop(numInt(l.toInt() >> r.toInt()))
+			p.replaceTop(numInt(l.toNumber().toInt() >> r.toNumber().toInt()))
 
 		case compiler.Power:
 			l, r := p.peekPop()
-			p.replaceTop(num(math.Pow(l.toFloat(), r.toFloat())))
+			p.replaceTop(num(math.Pow(l.toNumber().toFloat(), r.toNumber().toFloat())))
 
 		case compiler.Modulo:
 			l, r := p.peekPop()
@@ -683,7 +683,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			return errExit
 
 		case compiler.ExitStatus:
-			p.exitStatus = int(p.pop().toInt())
+			p.exitStatus = int(p.pop().toNumber().toInt())
 			return errExit
 
 		case compiler.ForIn:
@@ -997,7 +997,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 	switch builtinOp {
 	case compiler.BuiltinAtan2:
 		y, x := p.peekPop()
-		p.replaceTop(num(math.Atan2(y.toFloat(), x.toFloat())))
+		p.replaceTop(num(math.Atan2(y.toNumber().toFloat(), x.toNumber().toFloat())))
 
 	case compiler.BuiltinClose:
 		var err error
@@ -1021,10 +1021,10 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 		p.replaceTop(numInt(int64(code)))
 
 	case compiler.BuiltinCos:
-		p.replaceTop(num(math.Cos(p.peekTop().toFloat())))
+		p.replaceTop(num(math.Cos(p.peekTop().toNumber().toFloat())))
 
 	case compiler.BuiltinExp:
-		p.replaceTop(num(math.Exp(p.peekTop().toFloat())))
+		p.replaceTop(num(math.Exp(p.peekTop().toNumber().toFloat())))
 
 	case compiler.BuiltinFflush:
 		name := p.toString(p.peekTop())
@@ -1073,7 +1073,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 		p.replaceTop(numInt(int64(awkIndex)))
 
 	case compiler.BuiltinInt:
-		p.replaceTop(numInt(p.peekTop().toInt()))
+		p.replaceTop(numInt(p.peekTop().toNumber().toInt()))
 
 	case compiler.BuiltinLength:
 		var length int
@@ -1095,7 +1095,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 		p.replaceTop(numInt(int64(length)))
 
 	case compiler.BuiltinLog:
-		p.replaceTop(num(math.Log(p.peekTop().toFloat())))
+		p.replaceTop(num(math.Log(p.peekTop().toNumber().toFloat())))
 
 	case compiler.BuiltinMatch:
 		sValue, regex := p.peekPop()
@@ -1121,10 +1121,10 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 		p.push(num(p.random.Float64()))
 
 	case compiler.BuiltinSin:
-		p.replaceTop(num(math.Sin(p.peekTop().toFloat())))
+		p.replaceTop(num(math.Sin(p.peekTop().toNumber().toFloat())))
 
 	case compiler.BuiltinSqrt:
-		p.replaceTop(num(math.Sqrt(p.peekTop().toFloat())))
+		p.replaceTop(num(math.Sqrt(p.peekTop().toNumber().toFloat())))
 
 	case compiler.BuiltinSrand:
 		prevSeed := p.randSeed
@@ -1134,7 +1134,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 
 	case compiler.BuiltinSrandSeed:
 		prevSeed := p.randSeed
-		p.randSeed = p.peekTop().toFloat()
+		p.randSeed = p.peekTop().toNumber().toFloat()
 		p.random.Seed(int64(math.Float64bits(p.randSeed)))
 		p.replaceTop(num(prevSeed))
 
@@ -1148,7 +1148,7 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 
 	case compiler.BuiltinSubstr:
 		sValue, posValue := p.peekPop()
-		pos := int(posValue.toInt())
+		pos := int(posValue.toNumber().toInt())
 		s := p.toString(sValue)
 		var substr string
 		if p.chars {
@@ -1167,8 +1167,8 @@ func (p *interp) callBuiltin(builtinOp compiler.BuiltinOp) error {
 
 	case compiler.BuiltinSubstrLength:
 		posValue, lengthValue := p.popTwo()
-		length := int(lengthValue.toInt())
-		pos := int(posValue.toInt())
+		length := int(lengthValue.toNumber().toInt())
+		pos := int(posValue.toNumber().toInt())
 		s := p.toString(p.peekTop())
 		var substr string
 		if p.chars {
@@ -1379,7 +1379,7 @@ func (p *interp) augAssignOp(op compiler.AugOp, l, r value) (value, error) {
 		}
 		return l.divide(r).toValue(), nil
 	case compiler.AugOpPow:
-		return num(math.Pow(l.toFloat(), r.toFloat())), nil // XXX do we need to handle int case here?
+		return num(math.Pow(l.toNumber().toFloat(), r.toNumber().toFloat())), nil // XXX do we need to handle int case here?
 	case compiler.AugOpBitAnd:
 		return numInt(l.toNumber().toInt() & r.toNumber().toInt()), nil
 	case compiler.AugOpBitOr:
