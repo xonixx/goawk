@@ -158,6 +158,11 @@ const (
 	AugOpDiv
 	AugOpPow
 	AugOpMod
+	AugOpBitAnd
+	AugOpBitOr
+	AugOpBitXor
+	AugOpBitLShift
+	AugOpBitRShift
 )
 
 // BuiltinOp represents a builtin function call.

@@ -1380,6 +1380,16 @@ func (p *interp) augAssignOp(op compiler.AugOp, l, r value) (value, error) {
 		return l.divide(r).toValue(), nil
 	case compiler.AugOpPow:
 		return num(math.Pow(l.toFloat(), r.toFloat())), nil // XXX do we need to handle int case here?
+	case compiler.AugOpBitAnd:
+		return numInt(l.toNumber().toInt() & r.toNumber().toInt()), nil
+	case compiler.AugOpBitOr:
+		return numInt(l.toNumber().toInt() | r.toNumber().toInt()), nil
+	case compiler.AugOpBitXor:
+		return numInt(l.toNumber().toInt() ^ r.toNumber().toInt()), nil
+	case compiler.AugOpBitLShift:
+		return numInt(l.toNumber().toInt() << r.toNumber().toInt()), nil
+	case compiler.AugOpBitRShift:
+		return numInt(l.toNumber().toInt() >> r.toNumber().toInt()), nil
 	default: // AugOpMod
 		rf := r.toNumber()
 		if rf.isZero() {

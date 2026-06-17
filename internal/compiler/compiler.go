@@ -302,6 +302,16 @@ func (c *compiler) stmt(stmt ast.Stmt) {
 				augOp = AugOpDiv
 			case lexer.POW:
 				augOp = AugOpPow
+			case lexer.BIT_AND:
+				augOp = AugOpBitAnd
+			case lexer.BIT_OR:
+				augOp = AugOpBitOr
+			case lexer.BIT_XOR:
+				augOp = AugOpBitXor
+			case lexer.BIT_LSHIFT:
+				augOp = AugOpBitLShift
+			case lexer.BIT_RSHIFT:
+				augOp = AugOpBitRShift
 			default: // MOD
 				augOp = AugOpMod
 			}

@@ -132,11 +132,16 @@ func _() {
 	_ = x[AugOpDiv-3]
 	_ = x[AugOpPow-4]
 	_ = x[AugOpMod-5]
+	_ = x[AugOpBitAnd-6]
+	_ = x[AugOpBitOr-7]
+	_ = x[AugOpBitXor-8]
+	_ = x[AugOpBitLShift-9]
+	_ = x[AugOpBitRShift-10]
 }
 
-const _AugOp_name = "AugOpAddAugOpSubAugOpMulAugOpDivAugOpPowAugOpMod"
+const _AugOp_name = "AugOpAddAugOpSubAugOpMulAugOpDivAugOpPowAugOpModAugOpBitAndAugOpBitOrAugOpBitXorAugOpBitLShiftAugOpBitRShift"
 
-var _AugOp_index = [...]uint8{0, 8, 16, 24, 32, 40, 48}
+var _AugOp_index = [...]uint8{0, 8, 16, 24, 32, 40, 48, 59, 69, 80, 94, 108}
 
 func (i AugOp) String() string {
 	idx := int(i) - 0

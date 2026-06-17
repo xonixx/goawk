@@ -546,7 +546,8 @@ func (p *parser) getline() ast.Expr {
 func (p *parser) _assign(higher func() ast.Expr) ast.Expr {
 	leftPos := p.pos
 	expr := higher()
-	if p.matches(lexer.ASSIGN, lexer.ADD_ASSIGN, lexer.DIV_ASSIGN, lexer.MOD_ASSIGN, lexer.MUL_ASSIGN, lexer.POW_ASSIGN, lexer.SUB_ASSIGN) {
+	if p.matches(lexer.ASSIGN, lexer.ADD_ASSIGN, lexer.DIV_ASSIGN, lexer.MOD_ASSIGN, lexer.MUL_ASSIGN, lexer.POW_ASSIGN, lexer.SUB_ASSIGN,
+		lexer.BIT_AND_ASSIGN, lexer.BIT_OR_ASSIGN, lexer.BIT_XOR_ASSIGN, lexer.BIT_LSHIFT_ASSIGN, lexer.BIT_RSHIFT_ASSIGN) {
 		_, isNamedField := expr.(*ast.NamedFieldExpr)
 		if isNamedField {
 			panic(p.errorf("assigning @ expression not supported"))
@@ -591,6 +592,16 @@ func makeAssign(left ast.Expr, op lexer.Token, right ast.Expr) ast.Expr {
 		op = lexer.POW
 	case lexer.SUB_ASSIGN:
 		op = lexer.SUB
+	case lexer.BIT_AND_ASSIGN:
+		op = lexer.BIT_AND
+	case lexer.BIT_OR_ASSIGN:
+		op = lexer.BIT_OR
+	case lexer.BIT_XOR_ASSIGN:
+		op = lexer.BIT_XOR
+	case lexer.BIT_LSHIFT_ASSIGN:
+		op = lexer.BIT_LSHIFT
+	case lexer.BIT_RSHIFT_ASSIGN:
+		op = lexer.BIT_RSHIFT
 	}
 	return &ast.AugAssignExpr{Left: left, Op: op, Right: right}
 }
