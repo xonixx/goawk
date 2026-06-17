@@ -683,31 +683,38 @@ func (p *parser) _match(higher func() ast.Expr) ast.Expr {
 //
 //	concat [EQUALS|NOT_EQUALS|LESS|LTE|GREATER|GTE concat]
 func (p *parser) compare() ast.Expr {
-	return p._compare(lexer.EQUALS, lexer.NOT_EQUALS, lexer.LESS, lexer.LTE, lexer.GTE, lexer.GREATER)
+	return p._compare(p.shift, lexer.EQUALS, lexer.NOT_EQUALS, lexer.LESS, lexer.LTE, lexer.GTE, lexer.GREATER)
 }
 func (p *parser) printCompare() ast.Expr {
-	return p._compare(lexer.EQUALS, lexer.NOT_EQUALS, lexer.LESS, lexer.LTE, lexer.GTE)
+	return p._compare(p.printShift, lexer.EQUALS, lexer.NOT_EQUALS, lexer.LESS, lexer.LTE, lexer.GTE)
 }
 
-func (p *parser) _compare(ops ...lexer.Token) ast.Expr {
-	expr := p.concat()
+func (p *parser) _compare(shift func() ast.Expr, ops ...lexer.Token) ast.Expr {
+	expr := p.concat(shift)
 	if p.matches(ops...) {
 		op := p.tok
 		p.next()
-		right := p.concat() // Not compare() as these aren't associative
+		right := p.concat(shift) // Not compare() as these aren't associative
 		return &ast.BinaryExpr{Left: expr, Op: op, Right: right}
 	}
 	return expr
 }
 
-func (p *parser) concat() ast.Expr {
-	expr := p.add()
+func (p *parser) concat(shift func() ast.Expr) ast.Expr {
+	expr := shift()
 	for p.matches(lexer.DOLLAR, lexer.AT, lexer.NOT, lexer.NAME, lexer.NUMBER, lexer.INT, lexer.STRING, lexer.LPAREN, lexer.INCR, lexer.DECR) ||
 		p.tok >= lexer.FIRST_FUNC && p.tok <= lexer.LAST_FUNC {
-		right := p.add()
+		right := p.shift()
 		expr = &ast.BinaryExpr{Left: expr, Op: lexer.CONCAT, Right: right}
 	}
 	return expr
+}
+
+func (p *parser) shift() ast.Expr {
+	return p.binaryLeft(p.add, false, lexer.BIT_LSHIFT, lexer.BIT_RSHIFT)
+}
+func (p *parser) printShift() ast.Expr {
+	return p.binaryLeft(p.add, false, lexer.BIT_LSHIFT)
 }
 
 func (p *parser) add() ast.Expr {

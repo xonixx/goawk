@@ -92,6 +92,8 @@ const (
 	BitAnd
 	BitXor
 	BitOr
+	BitLeftShift
+	BitRightShift
 	Match
 	NotMatch
 

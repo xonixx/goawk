@@ -204,7 +204,16 @@ func (l *Lexer) scan() (Position, Token, string) {
 	case '=':
 		tok = l.choice('=', ASSIGN, EQUALS)
 	case '<':
-		tok = l.choice('=', LESS, LTE)
+		switch l.ch {
+		case '=':
+			l.next()
+			tok = LTE
+		case '<':
+			l.next()
+			tok = BIT_LSHIFT
+		default:
+			tok = LESS
+		}
 	case '>':
 		switch l.ch {
 		case '=':

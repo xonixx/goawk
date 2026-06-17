@@ -380,6 +380,14 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			l, r := p.peekPop()
 			p.replaceTop(numInt(l.toInt() | r.toInt()))
 
+		case compiler.BitLeftShift:
+			l, r := p.peekPop()
+			p.replaceTop(numInt(l.toInt() << r.toInt()))
+
+		case compiler.BitRightShift:
+			l, r := p.peekPop()
+			p.replaceTop(numInt(l.toInt() >> r.toInt()))
+
 		case compiler.Power:
 			l, r := p.peekPop()
 			p.replaceTop(num(math.Pow(l.toFloat(), r.toFloat())))

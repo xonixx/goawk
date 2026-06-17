@@ -1170,6 +1170,10 @@ func (c *compiler) binaryOp(op lexer.Token) {
 		opcode = NotEquals
 	case lexer.BITAND:
 		opcode = BitAnd
+	case lexer.BIT_LSHIFT:
+		opcode = BitLeftShift
+	case lexer.BIT_RSHIFT:
+		opcode = BitRightShift
 	case lexer.BITXOR:
 		opcode = BitXor
 	case lexer.BITOR:

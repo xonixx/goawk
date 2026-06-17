@@ -281,6 +281,8 @@ BEGIN {
 	{`BEGIN { print 2**3, 2**3**3, 2**-3, -2**3, "2"**"3", 3**.14 }  # !posix`, "", "8 134217728 0.125 -8 8 1.16626\n", "", ""},
 	{`BEGIN { print 7&14 }  # !posix !gawk`, "", "6\n", "", ""},
 	{`BEGIN { print (2|4) }  # !posix !gawk`, "", "6\n", "", ""},
+	{`BEGIN { print 3<<2 }  # !posix !gawk`, "", "12\n", "", ""},
+	{`BEGIN { print (12>>2) }  # !posix !gawk`, "", "3\n", "", ""},
 	{`BEGIN { print(5^2);print(-5^2);print(5^-2);print(-5^-2) }  # !posix !gawk`, "", "7\n-7\n-5\n5\n", "", ""},
 	{`BEGIN { print 1 2, "x" "yz", 1+2 3+4 }`, "", "12 xyz 37\n", "", ""},
 	{`BEGIN { print "food"~/oo/, "food"~/[oO]+d/, "food"~"f", "food"~"F", "food"~0 }`, "", "1 1 1 0 0\n", "", ""},
