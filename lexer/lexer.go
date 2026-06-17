@@ -210,7 +210,7 @@ func (l *Lexer) scan() (Position, Token, string) {
 			tok = LTE
 		case '<':
 			l.next()
-			tok = BIT_LSHIFT
+			tok = l.choice('=', BIT_LSHIFT, BIT_LSHIFT_ASSIGN)
 		default:
 			tok = LESS
 		}
@@ -221,7 +221,7 @@ func (l *Lexer) scan() (Position, Token, string) {
 			tok = GTE
 		case '>':
 			l.next()
-			tok = APPEND
+			tok = l.choice('=', APPEND, BIT_RSHIFT_ASSIGN)
 		default:
 			tok = GREATER
 		}
@@ -291,7 +291,7 @@ func (l *Lexer) scan() (Position, Token, string) {
 	case '\n':
 		tok = NEWLINE
 	case '^':
-		tok = l.choice('=', BITXOR, POW_ASSIGN) // TODO xor_assign
+		tok = l.choice('=', BIT_XOR, BIT_XOR_ASSIGN)
 	case '!':
 		switch l.ch {
 		case '=':
@@ -310,9 +310,27 @@ func (l *Lexer) scan() (Position, Token, string) {
 	case ':':
 		tok = COLON
 	case '&':
-		tok = l.choice('&', BITAND, AND)
+		switch l.ch {
+		case '&':
+			l.next()
+			tok = AND
+		case '=':
+			l.next()
+			tok = BIT_AND_ASSIGN
+		default:
+			tok = BIT_AND
+		}
 	case '|':
-		tok = l.choice('|', PIPE, OR)
+		switch l.ch {
+		case '|':
+			l.next()
+			tok = OR
+		case '=':
+			l.next()
+			tok = BIT_OR_ASSIGN
+		default:
+			tok = BIT_OR
+		}
 	default:
 		tok = ILLEGAL
 		val = "unexpected char"

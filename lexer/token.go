@@ -19,9 +19,14 @@ const (
 	APPEND
 	ASSIGN
 	AT
-	BITAND     // &
-	BITXOR     // ^
-	BIT_LSHIFT // <<
+	BIT_AND           // &
+	BIT_AND_ASSIGN    // &=
+	BIT_XOR           // ^
+	BIT_XOR_ASSIGN    // ^=
+	BIT_LSHIFT        // <<
+	BIT_LSHIFT_ASSIGN // <<=
+	BIT_OR_ASSIGN     // |=
+	BIT_RSHIFT_ASSIGN // >>=
 	COLON
 	COMMA
 	DECR
@@ -112,8 +117,8 @@ const (
 	STRING
 	REGEX
 
-	BITOR      = PIPE   // |
-	BITNOT     = MATCH  // ~
+	BIT_OR     = PIPE   // |
+	BIT_NOT    = MATCH  // ~
 	BIT_RSHIFT = APPEND // >>
 
 	LAST       = REGEX
@@ -184,8 +189,8 @@ var tokenNames = map[Token]string{
 	APPEND:     ">>",
 	ASSIGN:     "=",
 	AT:         "@",
-	BITAND:     "&",
-	BITXOR:     "^",
+	BIT_AND:    "&",
+	BIT_XOR:    "^",
 	BIT_LSHIFT: "<<",
 	COLON:      ":",
 	COMMA:      ",",

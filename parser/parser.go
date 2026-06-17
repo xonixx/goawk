@@ -632,19 +632,19 @@ func (p *parser) printAnd() ast.Expr { return p.binaryLeft(p.printBitXor, true, 
 //	bitxor [BITOR NEWLINE* bitxor] [BITOR NEWLINE* bitxor] ...
 //
 // We won't parse | in print due to conflict with `print a | script` syntax
-func (p *parser) bitOr() ast.Expr { return p.binaryLeft(p.bitXor, true, lexer.BITOR) }
+func (p *parser) bitOr() ast.Expr { return p.binaryLeft(p.bitXor, true, lexer.BIT_OR) }
 
 // Parse a ^ bitxor expression:
 //
 //	bitand [BITXOR NEWLINE* bitand] [BITXOR NEWLINE* bitand] ...
-func (p *parser) bitXor() ast.Expr      { return p.binaryLeft(p.bitAnd, true, lexer.BITXOR) }
-func (p *parser) printBitXor() ast.Expr { return p.binaryLeft(p.printBitAnd, true, lexer.BITXOR) }
+func (p *parser) bitXor() ast.Expr      { return p.binaryLeft(p.bitAnd, true, lexer.BIT_XOR) }
+func (p *parser) printBitXor() ast.Expr { return p.binaryLeft(p.printBitAnd, true, lexer.BIT_XOR) }
 
 // Parse a & bitand expression:
 //
 //	in [BITAND NEWLINE* in] [BITAND NEWLINE* in] ...
-func (p *parser) bitAnd() ast.Expr      { return p.binaryLeft(p.in, true, lexer.BITAND) }
-func (p *parser) printBitAnd() ast.Expr { return p.binaryLeft(p.printIn, true, lexer.BITAND) }
+func (p *parser) bitAnd() ast.Expr      { return p.binaryLeft(p.in, true, lexer.BIT_AND) }
+func (p *parser) printBitAnd() ast.Expr { return p.binaryLeft(p.printIn, true, lexer.BIT_AND) }
 
 // Parse an "in" expression:
 //
@@ -792,7 +792,7 @@ func (p *parser) primary() ast.Expr {
 	case lexer.AT:
 		p.next()
 		return &ast.NamedFieldExpr{Field: p.primary()}
-	case lexer.NOT, lexer.ADD, lexer.SUB, lexer.BITNOT:
+	case lexer.NOT, lexer.ADD, lexer.SUB, lexer.BIT_NOT:
 		op := p.tok
 		p.next()
 		return &ast.UnaryExpr{Op: op, Value: p.pow()}

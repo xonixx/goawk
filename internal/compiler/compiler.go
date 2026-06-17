@@ -942,7 +942,7 @@ func (c *compiler) expr(expr ast.Expr) {
 			c.add(UnaryMinus)
 		case lexer.NOT:
 			c.add(Not)
-		case lexer.BITNOT:
+		case lexer.BIT_NOT:
 			c.add(BitNot)
 		default: // ADD
 			c.add(UnaryPlus)
@@ -1168,15 +1168,15 @@ func (c *compiler) binaryOp(op lexer.Token) {
 		opcode = GreaterOrEqual
 	case lexer.NOT_EQUALS:
 		opcode = NotEquals
-	case lexer.BITAND:
+	case lexer.BIT_AND:
 		opcode = BitAnd
 	case lexer.BIT_LSHIFT:
 		opcode = BitLeftShift
 	case lexer.BIT_RSHIFT:
 		opcode = BitRightShift
-	case lexer.BITXOR:
+	case lexer.BIT_XOR:
 		opcode = BitXor
-	case lexer.BITOR:
+	case lexer.BIT_OR:
 		opcode = BitOr
 	case lexer.MATCH:
 		opcode = Match
