@@ -186,12 +186,9 @@ var tokenNames = map[Token]string{
 	ADD:        "+",
 	ADD_ASSIGN: "+=",
 	AND:        "&&",
-	APPEND:     ">>",
+	APPEND:     ">>", // same as BIT_RSHIFT
 	ASSIGN:     "=",
 	AT:         "@",
-	BIT_AND:    "&",
-	BIT_XOR:    "^",
-	BIT_LSHIFT: "<<",
 	COLON:      ":",
 	COMMA:      ",",
 	DECR:       "--",
@@ -216,7 +213,7 @@ var tokenNames = map[Token]string{
 	NOT:        "!",
 	NOT_EQUALS: "!=",
 	OR:         "||",
-	PIPE:       "|", // same as BITOR
+	PIPE:       "|", // same as BIT_OR
 	POW:        "**",
 	POW_ASSIGN: "**=",
 	QUESTION:   "?",
@@ -226,6 +223,15 @@ var tokenNames = map[Token]string{
 	SEMICOLON:  ";",
 	SUB:        "-",
 	SUB_ASSIGN: "-=",
+
+	BIT_AND:           "&",
+	BIT_AND_ASSIGN:    "&=",
+	BIT_XOR:           "^",
+	BIT_XOR_ASSIGN:    "^=",
+	BIT_LSHIFT:        "<<",
+	BIT_LSHIFT_ASSIGN: "<<=",
+	BIT_OR_ASSIGN:     "|=",
+	BIT_RSHIFT_ASSIGN: ">>=",
 
 	BEGIN:    "BEGIN",
 	BREAK:    "break",
