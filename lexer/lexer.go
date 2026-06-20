@@ -151,6 +151,21 @@ func (l *Lexer) scan() (Position, Token, string) {
 		gotDigit := false
 		gotDot := false
 		gotE := false
+		if ch == '0' {
+			if l.ch == 'x' || l.ch == 'X' {
+				l.next()
+				for isHexDigit(l.ch) {
+					gotDigit = true
+					l.next()
+				}
+				if !gotDigit {
+					l.unread()
+				}
+				tok = INT
+				val = string(l.src[start : l.offset-1])
+				break
+			}
+		}
 		if ch != '.' {
 			gotDigit = true
 			for isDigit(l.ch) {
@@ -425,6 +440,10 @@ func isNameStart(ch byte) bool {
 
 func isDigit(ch byte) bool {
 	return ch >= '0' && ch <= '9'
+}
+
+func isHexDigit(c byte) bool {
+	return c >= '0' && c <= '9' || c >= 'a' && c <= 'f' || c >= 'A' && c <= 'F'
 }
 
 // Return the hex digit 0-15 corresponding to the given ASCII byte,
