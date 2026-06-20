@@ -5,6 +5,6 @@ BEGIN {
 	e = exp(1)
 	printf "e = %f\n", e
 	printf "log(e) = %f\n", log(e)
-	printf "sqrt(pi ^ 2) = %f\n", sqrt(pi ^ 2)
+	printf "sqrt(pi ** 2) = %f\n", sqrt(pi ** 2)
 	printf "atan2(1, 1) = %f\n", atan2(1, 1)
 }

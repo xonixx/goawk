@@ -108,4 +108,4 @@
 #  	case Node_var_array:
 #  		fatal("attempt to use array `%s' in a scalar context",
 #
-{ print NR " " 10/NR }
+{ print NR " " 10./NR }

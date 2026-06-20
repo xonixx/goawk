@@ -7,6 +7,6 @@ NR < 50 { n = split($0, x)
   k = 0
   for (i in y)
 	k++
-  if (k != int(n^2-n))
-	printf "delete2 miscount %d vs %d at %d\n", k, n^2-n, NR
+  if (k != int(n**2-n)) # awk2: ^ is xor
+	printf "delete2 miscount %d vs %d at %d\n", k, n**2-n, NR
 }
