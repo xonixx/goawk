@@ -24,3 +24,9 @@ Add number literals
 
 - [ ] `0xCAFEBABE` hex. We won't support hex float/exponent literals!
 - [ ] support underscores: `1_000_000`
+
+Division
+
+- [ ] TBD: `/` va `//` vs `/.`
+  - `//` gives a conflict with regex literal
+- [ ] TBD: zero division
