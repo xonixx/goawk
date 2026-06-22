@@ -150,33 +150,19 @@ func (l *Lexer) scan() (Position, Token, string) {
 		start := l.offset - 2
 		gotDigit := false
 		gotDot := false
-		gotE := false
-		if ch == '0' {
-			if l.ch == 'x' || l.ch == 'X' {
+		gotExp := false
+		if ch == '0' && (l.ch == 'x' || l.ch == 'X') {
+			l.next()
+			for isHexDigit(l.ch) {
+				gotDigit = true
 				l.next()
-				if l.ch != '.' {
-					gotDigit = true
-					for isHexDigit(l.ch) {
-						l.next()
-					}
-					if l.ch == '.' {
-						gotDot = true
-						l.next()
-					}
-				} else {
-					gotDot = true
-				}
-				for isHexDigit(l.ch) {
-					gotDigit = true
-					l.next()
-				}
-				if !gotDigit {
-					l.unread()
-				}
-				tok = INT
-				val = string(l.src[start : l.offset-1])
-				break
 			}
+			if !gotDigit {
+				l.unread() // consume only `0`, return back `x`
+			}
+			tok = INT
+			val = string(l.src[start : l.offset-1])
+			break
 		}
 		if ch != '.' {
 			gotDigit = true
@@ -198,7 +184,7 @@ func (l *Lexer) scan() (Position, Token, string) {
 			return l.pos, ILLEGAL, "expected digits"
 		}
 		if l.ch == 'e' || l.ch == 'E' {
-			gotE = true
+			gotExp = true
 			l.next()
 			gotSign := false
 			if l.ch == '+' || l.ch == '-' {
@@ -220,7 +206,7 @@ func (l *Lexer) scan() (Position, Token, string) {
 			}
 		}
 		tok = NUMBER
-		if !gotDot && !gotE {
+		if !gotDot && !gotExp {
 			tok = INT
 		}
 		val = string(l.src[start : l.offset-1])
