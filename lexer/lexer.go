@@ -154,6 +154,18 @@ func (l *Lexer) scan() (Position, Token, string) {
 		if ch == '0' {
 			if l.ch == 'x' || l.ch == 'X' {
 				l.next()
+				if l.ch != '.' {
+					gotDigit = true
+					for isHexDigit(l.ch) {
+						l.next()
+					}
+					if l.ch == '.' {
+						gotDot = true
+						l.next()
+					}
+				} else {
+					gotDot = true
+				}
 				for isHexDigit(l.ch) {
 					gotDigit = true
 					l.next()
