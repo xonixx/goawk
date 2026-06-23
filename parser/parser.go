@@ -774,9 +774,7 @@ func (p *parser) primary() ast.Expr {
 		p.next()
 		return &ast.NumExpr{Value: n}
 	case lexer.INT:
-		// AWK allows forms like "1.5e", but ParseInt doesn't
-		s := strings.TrimRight(p.val, "eE")
-		n, _ := strconv.ParseInt(s, 10, 64)
+		n, _ := strconv.ParseInt(p.val, 0, 64)
 		p.next()
 		return &ast.NumIntExpr{Value: n}
 	case lexer.STRING:

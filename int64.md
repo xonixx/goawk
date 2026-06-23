@@ -22,8 +22,8 @@ We need to implement operators:
 
 Add number literals
 
-- [ ] `0xCAFEBABE` hex. We won't support hex float/exponent literals!
-- [ ] support underscores: `1_000_000`
+- [x] `0xCAFEBABE` hex. We won't support hex float/exponent literals!
+- [x] support underscores: `1_000_000`
 
 Division
 
