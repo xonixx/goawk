@@ -288,7 +288,7 @@ func (n number) multiply(a number) number {
 
 // float divide
 func (n number) divideFloat(a number) number {
-	return numberFloat(math.Floor(n.toFloat() / a.toFloat()))
+	return numberFloat(n.toFloat() / a.toFloat())
 }
 
 // int divide

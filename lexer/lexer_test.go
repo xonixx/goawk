@@ -150,7 +150,7 @@ func TestScanRegexInvalid(t *testing.T) {
 	defer func() {
 		r := recover()
 		if message, ok := r.(string); ok {
-			expected := "ScanRegex should only be called after DIV or DIV_ASSIGN token"
+			expected := "ScanRegex should only be called after DIV, DIV_ASSIGN or DIV_INT token"
 			if message != expected {
 				t.Fatalf("expected %q, got %q", expected, message)
 			}
@@ -243,7 +243,7 @@ func TestKeywordToken(t *testing.T) {
 
 func TestAllTokens(t *testing.T) {
 	input := "# comment line\n" +
-		"+ += && = : , -- /\n/= $ @ == >= > >> ++ { [ < ( #\n" +
+		"+ += && = : , -- /\n/= // //= $ @ == >= > >> ++ { [ < ( #\n" +
 		"<= ~ % %= * *= !~ ! != | || ** **= ? } ] ) ; - -= & &= << <<= ^ ^= |= >>= " +
 		"BEGIN break continue delete do else END exit " +
 		"for function getline if in next nextfile print printf return while " +
@@ -266,7 +266,7 @@ func TestAllTokens(t *testing.T) {
 	output := strings.Join(strs, " ")
 
 	expected := "<newline> " +
-		"+ += && = : , -- / <newline> /= $ @ == >= > >> ++ { [ < ( <newline> " +
+		"+ += && = : , -- / <newline> /= // //= $ @ == >= > >> ++ { [ < ( <newline> " +
 		"<= ~ % %= * *= !~ ! != | || ** **= ? } ] ) ; - -= & &= << <<= ^ ^= |= >>= " +
 		"BEGIN break continue delete do else END exit " +
 		"for function getline if in next nextfile print printf return while " +

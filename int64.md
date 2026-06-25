@@ -27,6 +27,6 @@ Add number literals
 
 Division
 
-- [ ] TBD: `/` va `//` vs `/.`
+- [x] TBD: `/` va `//` vs `/.`
   - `//` gives a conflict with regex literal
 - [ ] TBD: zero division
