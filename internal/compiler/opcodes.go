@@ -80,6 +80,7 @@ const (
 	Subtract
 	Multiply
 	Divide
+	DivideInt
 	Power
 	Modulo
 	Equals
@@ -156,6 +157,7 @@ const (
 	AugOpSub
 	AugOpMul
 	AugOpDiv
+	AugOpDivInt
 	AugOpPow
 	AugOpMod
 	AugOpBitAnd

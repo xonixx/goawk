@@ -188,7 +188,7 @@ func (e *BinaryExpr) precedence() int {
 		return precConcat
 	case lexer.ADD, lexer.SUB:
 		return precAdd
-	case lexer.MUL, lexer.DIV, lexer.MOD:
+	case lexer.MUL, lexer.DIV, lexer.DIV_INT, lexer.MOD:
 		return precMul
 	case lexer.EQUALS, lexer.LESS, lexer.LTE, lexer.GREATER, lexer.GTE, lexer.NOT_EQUALS:
 		return precCompare

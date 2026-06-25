@@ -546,7 +546,7 @@ func (p *parser) getline() ast.Expr {
 func (p *parser) _assign(higher func() ast.Expr) ast.Expr {
 	leftPos := p.pos
 	expr := higher()
-	if p.matches(lexer.ASSIGN, lexer.ADD_ASSIGN, lexer.DIV_ASSIGN, lexer.MOD_ASSIGN, lexer.MUL_ASSIGN, lexer.POW_ASSIGN, lexer.SUB_ASSIGN,
+	if p.matches(lexer.ASSIGN, lexer.ADD_ASSIGN, lexer.DIV_ASSIGN, lexer.DIV_INT_ASSIGN, lexer.MOD_ASSIGN, lexer.MUL_ASSIGN, lexer.POW_ASSIGN, lexer.SUB_ASSIGN,
 		lexer.BIT_AND_ASSIGN, lexer.BIT_OR_ASSIGN, lexer.BIT_XOR_ASSIGN, lexer.BIT_LSHIFT_ASSIGN, lexer.BIT_RSHIFT_ASSIGN) {
 		_, isNamedField := expr.(*ast.NamedFieldExpr)
 		if isNamedField {
@@ -584,6 +584,8 @@ func makeAssign(left ast.Expr, op lexer.Token, right ast.Expr) ast.Expr {
 		op = lexer.ADD
 	case lexer.DIV_ASSIGN:
 		op = lexer.DIV
+	case lexer.DIV_INT_ASSIGN:
+		op = lexer.DIV_INT
 	case lexer.MOD_ASSIGN:
 		op = lexer.MOD
 	case lexer.MUL_ASSIGN:
@@ -733,7 +735,7 @@ func (p *parser) add() ast.Expr {
 }
 
 func (p *parser) mul() ast.Expr {
-	return p.binaryLeft(p.pow, false, lexer.MUL, lexer.DIV, lexer.MOD)
+	return p.binaryLeft(p.pow, false, lexer.MUL, lexer.DIV, lexer.DIV_INT, lexer.MOD)
 }
 
 func (p *parser) pow() ast.Expr {
@@ -781,8 +783,8 @@ func (p *parser) primary() ast.Expr {
 		s := p.val
 		p.next()
 		return &ast.StrExpr{Value: s}
-	case lexer.DIV, lexer.DIV_ASSIGN:
-		// If we get to DIV or DIV_ASSIGN as a primary expression,
+	case lexer.DIV, lexer.DIV_ASSIGN, lexer.DIV_INT:
+		// If we get to DIV or DIV_ASSIGN or DIV_INT as a primary expression,
 		// it's actually a regex.
 		regex := p.nextRegex()
 		return &ast.RegExpr{Regex: regex}
@@ -1019,7 +1021,7 @@ func (p *parser) optionalLValue() ast.Expr {
 //
 //	REGEX | expr
 func (p *parser) regexStr(parse func() ast.Expr) ast.Expr {
-	if p.matches(lexer.DIV, lexer.DIV_ASSIGN) {
+	if p.matches(lexer.DIV, lexer.DIV_ASSIGN, lexer.DIV_INT) {
 		regex := p.nextRegex()
 		return &ast.StrExpr{Value: regex, Regex: true}
 	}

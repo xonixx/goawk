@@ -366,7 +366,15 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			if rf.isZero() {
 				return newError("division by zero")
 			}
-			p.replaceTop(l.divide(r).toValue())
+			p.replaceTop(l.toNumber().divideFloat(rf).toValue())
+
+		case compiler.DivideInt:
+			l, r := p.peekPop()
+			rf := r.toNumber()
+			if rf.isZero() {
+				return newError("division by zero")
+			}
+			p.replaceTop(l.toNumber().divideInt(rf).toValue())
 
 		case compiler.BitAnd:
 			l, r := p.peekPop()
@@ -1377,7 +1385,13 @@ func (p *interp) augAssignOp(op compiler.AugOp, l, r value) (value, error) {
 		if rf.isZero() {
 			return null(), newError("division by zero")
 		}
-		return l.divide(r).toValue(), nil
+		return l.toNumber().divideFloat(rf).toValue(), nil
+	case compiler.AugOpDivInt:
+		rf := r.toNumber()
+		if rf.isZero() {
+			return null(), newError("division by zero")
+		}
+		return l.toNumber().divideInt(rf).toValue(), nil
 	case compiler.AugOpPow:
 		return num(math.Pow(l.toNumber().toFloat(), r.toNumber().toFloat())), nil // XXX do we need to handle int case here?
 	case compiler.AugOpBitAnd:

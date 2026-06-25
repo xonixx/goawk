@@ -384,7 +384,7 @@ func BenchmarkStrings(b *testing.B) {
 }
 
 func BenchmarkRegex(b *testing.B) {
-	source := `/x/ /./ /foo/ /bar/ /=equals=/ /\/\/\/\//`
+	source := `/x/ // /./ /foo/ /bar/ /=equals=/ /\/\/\/\//`
 	fullSource := []byte(strings.Repeat(source+" ", 5))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

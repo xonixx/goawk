@@ -300,6 +300,8 @@ func (c *compiler) stmt(stmt ast.Stmt) {
 				augOp = AugOpMul
 			case lexer.DIV:
 				augOp = AugOpDiv
+			case lexer.DIV_INT:
+				augOp = AugOpDivInt
 			case lexer.POW:
 				augOp = AugOpPow
 			case lexer.BIT_AND:
@@ -1172,6 +1174,8 @@ func (c *compiler) binaryOp(op lexer.Token) {
 		opcode = Multiply
 	case lexer.DIV:
 		opcode = Divide
+	case lexer.DIV_INT:
+		opcode = DivideInt
 	case lexer.GREATER:
 		opcode = Greater
 	case lexer.GTE:

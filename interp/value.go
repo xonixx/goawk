@@ -286,24 +286,20 @@ func (n number) multiply(a number) number {
 	return numberFloat(n.f * a.f)
 }
 
-// number divide
-func (n number) divide(a number) number {
+// float divide
+func (n number) divideFloat(a number) number {
+	return numberFloat(math.Floor(n.toFloat() / a.toFloat()))
+}
+
+// int divide
+func (n number) divideInt(a number) number {
 	if n.typ != a.typ {
-		return numberFloat(n.toFloat() / a.toFloat())
+		return numberFloat(math.Floor(n.toFloat() / a.toFloat()))
 	}
 	if n.typ == typeInt {
 		return numberInt(n.l / a.l)
 	}
-	return numberFloat(n.f / a.f)
-}
-
-// value divide
-// this needs special backward-compatible handling (ex.: $3/=2)
-func (n value) divide(a value) number {
-	if n.typ == typeNumStr || a.typ == typeNumStr {
-		return numberFloat(n.toNumber().toFloat() / a.toNumber().toFloat())
-	}
-	return n.toNumber().divide(a.toNumber())
+	return numberFloat(math.Floor(n.f / a.f))
 }
 
 // number modulo

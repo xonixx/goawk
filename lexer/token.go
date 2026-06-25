@@ -32,6 +32,8 @@ const (
 	DECR
 	DIV
 	DIV_ASSIGN
+	DIV_INT
+	DIV_INT_ASSIGN
 	DOLLAR
 	EQUALS
 	GTE
@@ -223,6 +225,9 @@ var tokenNames = map[Token]string{
 	SEMICOLON:  ";",
 	SUB:        "-",
 	SUB_ASSIGN: "-=",
+
+	DIV_INT:        "//",
+	DIV_INT_ASSIGN: "//=",
 
 	BIT_AND:           "&",
 	BIT_AND_ASSIGN:    "&=",

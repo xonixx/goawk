@@ -324,7 +324,16 @@ func (l *Lexer) scan() (Position, Token, string) {
 			tok = MUL
 		}
 	case '/':
-		tok = l.choice('=', DIV, DIV_ASSIGN)
+		switch l.ch {
+		case '=':
+			l.next()
+			tok = DIV_ASSIGN
+		case '/':
+			l.next()
+			tok = l.choice('=', DIV_INT, DIV_INT_ASSIGN)
+		default:
+			tok = DIV
+		}
 	case '%':
 		tok = l.choice('=', MOD, MOD_ASSIGN)
 	case '[':
@@ -383,7 +392,7 @@ func (l *Lexer) scan() (Position, Token, string) {
 
 // ScanRegex parses an AWK regular expression in /slash/ syntax. The
 // AWK grammar has somewhat special handling of regex tokens, so the
-// parser can only call this after a DIV or DIV_ASSIGN token has just
+// parser can only call this after a DIV or DIV_ASSIGN or DIV_INT token has just
 // been scanned.
 func (l *Lexer) ScanRegex() (Position, Token, string) {
 	pos, tok, val := l.scanRegex()
@@ -404,8 +413,11 @@ func (l *Lexer) scanRegex() (Position, Token, string) {
 		// Regex after '/=' (happens when regex starts with '=')
 		pos.Column -= 2
 		chars = append(chars, '=')
+	case DIV_INT:
+		// Regex is '//'
+		pos.Column -= 2
 	default:
-		panic("ScanRegex should only be called after DIV or DIV_ASSIGN token")
+		panic("ScanRegex should only be called after DIV, DIV_ASSIGN or DIV_INT token")
 	}
 	for l.ch != '/' {
 		c := l.ch
