@@ -547,7 +547,7 @@ func (p *parser) _assign(higher func() ast.Expr) ast.Expr {
 	leftPos := p.pos
 	expr := higher()
 	if p.matches(lexer.ASSIGN, lexer.ADD_ASSIGN, lexer.DIV_ASSIGN, lexer.DIV_INT_ASSIGN, lexer.MOD_ASSIGN, lexer.MUL_ASSIGN, lexer.POW_ASSIGN, lexer.SUB_ASSIGN,
-		lexer.BIT_AND_ASSIGN, lexer.BIT_OR_ASSIGN, lexer.BIT_XOR_ASSIGN, lexer.BIT_LSHIFT_ASSIGN, lexer.BIT_RSHIFT_ASSIGN) {
+		lexer.BIT_AND_ASSIGN, lexer.BIT_OR_ASSIGN, lexer.BIT_XOR_ASSIGN, lexer.BIT_LSHIFT_ASSIGN, lexer.BIT_RSHIFT_ASSIGN, lexer.BIT_RSHIFT_UNSIGNED_ASSIGN) {
 		_, isNamedField := expr.(*ast.NamedFieldExpr)
 		if isNamedField {
 			panic(p.errorf("assigning @ expression not supported"))
@@ -604,6 +604,8 @@ func makeAssign(left ast.Expr, op lexer.Token, right ast.Expr) ast.Expr {
 		op = lexer.BIT_LSHIFT
 	case lexer.BIT_RSHIFT_ASSIGN:
 		op = lexer.BIT_RSHIFT
+	case lexer.BIT_RSHIFT_UNSIGNED_ASSIGN:
+		op = lexer.BIT_RSHIFT_UNSIGNED
 	}
 	return &ast.AugAssignExpr{Left: left, Op: op, Right: right}
 }
@@ -724,10 +726,10 @@ func (p *parser) concat(shift func() ast.Expr) ast.Expr {
 }
 
 func (p *parser) shift() ast.Expr {
-	return p.binaryLeft(p.add, false, lexer.BIT_LSHIFT, lexer.BIT_RSHIFT)
+	return p.binaryLeft(p.add, false, lexer.BIT_LSHIFT, lexer.BIT_RSHIFT, lexer.BIT_RSHIFT_UNSIGNED)
 }
 func (p *parser) printShift() ast.Expr {
-	return p.binaryLeft(p.add, false, lexer.BIT_LSHIFT)
+	return p.binaryLeft(p.add, false, lexer.BIT_LSHIFT, lexer.BIT_RSHIFT_UNSIGNED)
 }
 
 func (p *parser) add() ast.Expr {

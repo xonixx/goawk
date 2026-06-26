@@ -264,9 +264,18 @@ func (l *Lexer) scan() (Position, Token, string) {
 			tok = GTE
 		case '>':
 			l.next()
-			tok = l.choice('=', APPEND, BIT_RSHIFT_ASSIGN)
+			switch l.ch {
+			case '=':
+				l.next()
+				tok = BIT_RSHIFT_ASSIGN // >>=
+			case '>':
+				l.next()
+				tok = l.choice('=', BIT_RSHIFT_UNSIGNED, BIT_RSHIFT_UNSIGNED_ASSIGN) // >>> or >>>=
+			default:
+				tok = APPEND // >>
+			}
 		default:
-			tok = GREATER
+			tok = GREATER // >
 		}
 	case '"', '\'':
 		// Note: POSIX awk spec doesn't allow single-quoted strings,

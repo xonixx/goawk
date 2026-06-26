@@ -95,6 +95,7 @@ const (
 	BitOr
 	BitLeftShift
 	BitRightShift
+	BitRightShiftUnsigned
 	Match
 	NotMatch
 
@@ -165,6 +166,7 @@ const (
 	AugOpBitXor
 	AugOpBitLShift
 	AugOpBitRShift
+	AugOpBitRShiftUnsigned
 )
 
 // BuiltinOp represents a builtin function call.

@@ -19,14 +19,16 @@ const (
 	APPEND
 	ASSIGN
 	AT
-	BIT_AND           // &
-	BIT_AND_ASSIGN    // &=
-	BIT_XOR           // ^
-	BIT_XOR_ASSIGN    // ^=
-	BIT_LSHIFT        // <<
-	BIT_LSHIFT_ASSIGN // <<=
-	BIT_OR_ASSIGN     // |=
-	BIT_RSHIFT_ASSIGN // >>=
+	BIT_AND                    // &
+	BIT_AND_ASSIGN             // &=
+	BIT_XOR                    // ^
+	BIT_XOR_ASSIGN             // ^=
+	BIT_LSHIFT                 // <<
+	BIT_LSHIFT_ASSIGN          // <<=
+	BIT_OR_ASSIGN              // |=
+	BIT_RSHIFT_ASSIGN          // >>=
+	BIT_RSHIFT_UNSIGNED        // >>>
+	BIT_RSHIFT_UNSIGNED_ASSIGN // >>>=
 	COLON
 	COMMA
 	DECR
@@ -229,14 +231,16 @@ var tokenNames = map[Token]string{
 	DIV_INT:        "//",
 	DIV_INT_ASSIGN: "//=",
 
-	BIT_AND:           "&",
-	BIT_AND_ASSIGN:    "&=",
-	BIT_XOR:           "^",
-	BIT_XOR_ASSIGN:    "^=",
-	BIT_LSHIFT:        "<<",
-	BIT_LSHIFT_ASSIGN: "<<=",
-	BIT_OR_ASSIGN:     "|=",
-	BIT_RSHIFT_ASSIGN: ">>=",
+	BIT_AND:                    "&",
+	BIT_AND_ASSIGN:             "&=",
+	BIT_XOR:                    "^",
+	BIT_XOR_ASSIGN:             "^=",
+	BIT_LSHIFT:                 "<<",
+	BIT_LSHIFT_ASSIGN:          "<<=",
+	BIT_OR_ASSIGN:              "|=",
+	BIT_RSHIFT_ASSIGN:          ">>=",
+	BIT_RSHIFT_UNSIGNED:        ">>>",
+	BIT_RSHIFT_UNSIGNED_ASSIGN: ">>>=",
 
 	BEGIN:    "BEGIN",
 	BREAK:    "break",

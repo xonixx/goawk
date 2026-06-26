@@ -244,7 +244,7 @@ func TestKeywordToken(t *testing.T) {
 func TestAllTokens(t *testing.T) {
 	input := "# comment line\n" +
 		"+ += && = : , -- /\n/= // //= $ @ == >= > >> ++ { [ < ( #\n" +
-		"<= ~ % %= * *= !~ ! != | || ** **= ? } ] ) ; - -= & &= << <<= ^ ^= |= >>= " +
+		"<= ~ % %= * *= !~ ! != | || ** **= ? } ] ) ; - -= & &= << <<= ^ ^= |= >>= >>> >>>= " +
 		"BEGIN break continue delete do else END exit " +
 		"for function getline if in next nextfile print printf return while " +
 		"atan2 close cos exp fflush gsub index int length log match rand " +
@@ -267,7 +267,7 @@ func TestAllTokens(t *testing.T) {
 
 	expected := "<newline> " +
 		"+ += && = : , -- / <newline> /= // //= $ @ == >= > >> ++ { [ < ( <newline> " +
-		"<= ~ % %= * *= !~ ! != | || ** **= ? } ] ) ; - -= & &= << <<= ^ ^= |= >>= " +
+		"<= ~ % %= * *= !~ ! != | || ** **= ? } ] ) ; - -= & &= << <<= ^ ^= |= >>= >>> >>>= " +
 		"BEGIN break continue delete do else END exit " +
 		"for function getline if in next nextfile print printf return while " +
 		"atan2 close cos exp fflush gsub index int length log match rand " +

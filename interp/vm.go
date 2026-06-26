@@ -396,6 +396,10 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			l, r := p.peekPop()
 			p.replaceTop(numInt(l.toNumber().toInt() >> r.toNumber().toInt()))
 
+		case compiler.BitRightShiftUnsigned:
+			l, r := p.peekPop()
+			p.replaceTop(numInt(int64(uint64(l.toNumber().toInt()) >> r.toNumber().toInt())))
+
 		case compiler.Power:
 			l, r := p.peekPop()
 			p.replaceTop(num(math.Pow(l.toNumber().toFloat(), r.toNumber().toFloat())))
@@ -1404,6 +1408,8 @@ func (p *interp) augAssignOp(op compiler.AugOp, l, r value) (value, error) {
 		return numInt(l.toNumber().toInt() << r.toNumber().toInt()), nil
 	case compiler.AugOpBitRShift:
 		return numInt(l.toNumber().toInt() >> r.toNumber().toInt()), nil
+	case compiler.AugOpBitRShiftUnsigned:
+		return numInt(int64(uint64(l.toNumber().toInt()) >> r.toNumber().toInt())), nil
 	default: // AugOpMod
 		rf := r.toNumber()
 		if rf.isZero() {

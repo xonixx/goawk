@@ -314,6 +314,8 @@ func (c *compiler) stmt(stmt ast.Stmt) {
 				augOp = AugOpBitLShift
 			case lexer.BIT_RSHIFT:
 				augOp = AugOpBitRShift
+			case lexer.BIT_RSHIFT_UNSIGNED:
+				augOp = AugOpBitRShiftUnsigned
 			default: // MOD
 				augOp = AugOpMod
 			}
@@ -1188,6 +1190,8 @@ func (c *compiler) binaryOp(op lexer.Token) {
 		opcode = BitLeftShift
 	case lexer.BIT_RSHIFT:
 		opcode = BitRightShift
+	case lexer.BIT_RSHIFT_UNSIGNED:
+		opcode = BitRightShiftUnsigned
 	case lexer.BIT_XOR:
 		opcode = BitXor
 	case lexer.BIT_OR:

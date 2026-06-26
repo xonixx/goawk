@@ -69,52 +69,53 @@ func _() {
 	_ = x[BitOr-58]
 	_ = x[BitLeftShift-59]
 	_ = x[BitRightShift-60]
-	_ = x[Match-61]
-	_ = x[NotMatch-62]
-	_ = x[Not-63]
-	_ = x[BitNot-64]
-	_ = x[UnaryMinus-65]
-	_ = x[UnaryPlus-66]
-	_ = x[Boolean-67]
-	_ = x[Jump-68]
-	_ = x[JumpFalse-69]
-	_ = x[JumpTrue-70]
-	_ = x[JumpEquals-71]
-	_ = x[JumpNotEquals-72]
-	_ = x[JumpLess-73]
-	_ = x[JumpGreater-74]
-	_ = x[JumpLessOrEqual-75]
-	_ = x[JumpGreaterOrEqual-76]
-	_ = x[Next-77]
-	_ = x[Nextfile-78]
-	_ = x[Exit-79]
-	_ = x[ExitStatus-80]
-	_ = x[ForIn-81]
-	_ = x[BreakForIn-82]
-	_ = x[CallBuiltin-83]
-	_ = x[CallLengthArray-84]
-	_ = x[CallSplit-85]
-	_ = x[CallSplitSep-86]
-	_ = x[CallSprintf-87]
-	_ = x[CallUser-88]
-	_ = x[CallNative-89]
-	_ = x[Return-90]
-	_ = x[ReturnNull-91]
-	_ = x[Nulls-92]
-	_ = x[Print-93]
-	_ = x[Printf-94]
-	_ = x[Getline-95]
-	_ = x[GetlineField-96]
-	_ = x[GetlineGlobal-97]
-	_ = x[GetlineLocal-98]
-	_ = x[GetlineSpecial-99]
-	_ = x[GetlineArray-100]
-	_ = x[EndOpcode-101]
+	_ = x[BitRightShiftUnsigned-61]
+	_ = x[Match-62]
+	_ = x[NotMatch-63]
+	_ = x[Not-64]
+	_ = x[BitNot-65]
+	_ = x[UnaryMinus-66]
+	_ = x[UnaryPlus-67]
+	_ = x[Boolean-68]
+	_ = x[Jump-69]
+	_ = x[JumpFalse-70]
+	_ = x[JumpTrue-71]
+	_ = x[JumpEquals-72]
+	_ = x[JumpNotEquals-73]
+	_ = x[JumpLess-74]
+	_ = x[JumpGreater-75]
+	_ = x[JumpLessOrEqual-76]
+	_ = x[JumpGreaterOrEqual-77]
+	_ = x[Next-78]
+	_ = x[Nextfile-79]
+	_ = x[Exit-80]
+	_ = x[ExitStatus-81]
+	_ = x[ForIn-82]
+	_ = x[BreakForIn-83]
+	_ = x[CallBuiltin-84]
+	_ = x[CallLengthArray-85]
+	_ = x[CallSplit-86]
+	_ = x[CallSplitSep-87]
+	_ = x[CallSprintf-88]
+	_ = x[CallUser-89]
+	_ = x[CallNative-90]
+	_ = x[Return-91]
+	_ = x[ReturnNull-92]
+	_ = x[Nulls-93]
+	_ = x[Print-94]
+	_ = x[Printf-95]
+	_ = x[Getline-96]
+	_ = x[GetlineField-97]
+	_ = x[GetlineGlobal-98]
+	_ = x[GetlineLocal-99]
+	_ = x[GetlineSpecial-100]
+	_ = x[GetlineArray-101]
+	_ = x[EndOpcode-102]
 }
 
-const _Opcode_name = "NopNumStrDupeDropSwapRoteFieldFieldIntFieldByNameFieldByNameStrGlobalLocalSpecialArrayGlobalArrayLocalInGlobalInLocalAssignFieldAssignFieldSubAssignGlobalAssignLocalAssignSpecialAssignArrayGlobalAssignArrayLocalDeleteDeleteAllIncrFieldIncrGlobalIncrLocalIncrSpecialIncrArrayGlobalIncrArrayLocalAugAssignFieldAugAssignGlobalAugAssignLocalAugAssignSpecialAugAssignArrayGlobalAugAssignArrayLocalRegexIndexMultiConcatMultiAddSubtractMultiplyDivideDivideIntPowerModuloEqualsNotEqualsLessGreaterLessOrEqualGreaterOrEqualConcatBitAndBitXorBitOrBitLeftShiftBitRightShiftMatchNotMatchNotBitNotUnaryMinusUnaryPlusBooleanJumpJumpFalseJumpTrueJumpEqualsJumpNotEqualsJumpLessJumpGreaterJumpLessOrEqualJumpGreaterOrEqualNextNextfileExitExitStatusForInBreakForInCallBuiltinCallLengthArrayCallSplitCallSplitSepCallSprintfCallUserCallNativeReturnReturnNullNullsPrintPrintfGetlineGetlineFieldGetlineGlobalGetlineLocalGetlineSpecialGetlineArrayEndOpcode"
+const _Opcode_name = "NopNumStrDupeDropSwapRoteFieldFieldIntFieldByNameFieldByNameStrGlobalLocalSpecialArrayGlobalArrayLocalInGlobalInLocalAssignFieldAssignFieldSubAssignGlobalAssignLocalAssignSpecialAssignArrayGlobalAssignArrayLocalDeleteDeleteAllIncrFieldIncrGlobalIncrLocalIncrSpecialIncrArrayGlobalIncrArrayLocalAugAssignFieldAugAssignGlobalAugAssignLocalAugAssignSpecialAugAssignArrayGlobalAugAssignArrayLocalRegexIndexMultiConcatMultiAddSubtractMultiplyDivideDivideIntPowerModuloEqualsNotEqualsLessGreaterLessOrEqualGreaterOrEqualConcatBitAndBitXorBitOrBitLeftShiftBitRightShiftBitRightShiftUnsignedMatchNotMatchNotBitNotUnaryMinusUnaryPlusBooleanJumpJumpFalseJumpTrueJumpEqualsJumpNotEqualsJumpLessJumpGreaterJumpLessOrEqualJumpGreaterOrEqualNextNextfileExitExitStatusForInBreakForInCallBuiltinCallLengthArrayCallSplitCallSplitSepCallSprintfCallUserCallNativeReturnReturnNullNullsPrintPrintfGetlineGetlineFieldGetlineGlobalGetlineLocalGetlineSpecialGetlineArrayEndOpcode"
 
-var _Opcode_index = [...]uint16{0, 3, 6, 9, 13, 17, 21, 25, 30, 38, 49, 63, 69, 74, 81, 92, 102, 110, 117, 128, 142, 154, 165, 178, 195, 211, 217, 226, 235, 245, 254, 265, 280, 294, 308, 323, 337, 353, 373, 392, 397, 407, 418, 421, 429, 437, 443, 452, 457, 463, 469, 478, 482, 489, 500, 514, 520, 526, 532, 537, 549, 562, 567, 575, 578, 584, 594, 603, 610, 614, 623, 631, 641, 654, 662, 673, 688, 706, 710, 718, 722, 732, 737, 747, 758, 773, 782, 794, 805, 813, 823, 829, 839, 844, 849, 855, 862, 874, 887, 899, 913, 925, 934}
+var _Opcode_index = [...]uint16{0, 3, 6, 9, 13, 17, 21, 25, 30, 38, 49, 63, 69, 74, 81, 92, 102, 110, 117, 128, 142, 154, 165, 178, 195, 211, 217, 226, 235, 245, 254, 265, 280, 294, 308, 323, 337, 353, 373, 392, 397, 407, 418, 421, 429, 437, 443, 452, 457, 463, 469, 478, 482, 489, 500, 514, 520, 526, 532, 537, 549, 562, 583, 588, 596, 599, 605, 615, 624, 631, 635, 644, 652, 662, 675, 683, 694, 709, 727, 731, 739, 743, 753, 758, 768, 779, 794, 803, 815, 826, 834, 844, 850, 860, 865, 870, 876, 883, 895, 908, 920, 934, 946, 955}
 
 func (i Opcode) String() string {
 	idx := int(i) - 0
@@ -139,11 +140,12 @@ func _() {
 	_ = x[AugOpBitXor-9]
 	_ = x[AugOpBitLShift-10]
 	_ = x[AugOpBitRShift-11]
+	_ = x[AugOpBitRShiftUnsigned-12]
 }
 
-const _AugOp_name = "AugOpAddAugOpSubAugOpMulAugOpDivAugOpDivIntAugOpPowAugOpModAugOpBitAndAugOpBitOrAugOpBitXorAugOpBitLShiftAugOpBitRShift"
+const _AugOp_name = "AugOpAddAugOpSubAugOpMulAugOpDivAugOpDivIntAugOpPowAugOpModAugOpBitAndAugOpBitOrAugOpBitXorAugOpBitLShiftAugOpBitRShiftAugOpBitRShiftUnsigned"
 
-var _AugOp_index = [...]uint8{0, 8, 16, 24, 32, 43, 51, 59, 70, 80, 91, 105, 119}
+var _AugOp_index = [...]uint8{0, 8, 16, 24, 32, 43, 51, 59, 70, 80, 91, 105, 119, 141}
 
 func (i AugOp) String() string {
 	idx := int(i) - 0

@@ -19,6 +19,7 @@ We need to implement operators:
 - [x] `>>` - right shift
   - we have a clash with AWK's print-to-file redirection `print items >> output-file`. But somehow this is not a problem for `>`.
 - [x] `&= ^= |= <<= >>=`
+- [x] `>>>` - unsigned right shift
 
 Add number literals
 
