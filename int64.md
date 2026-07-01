@@ -25,6 +25,8 @@ Add number literals
 
 - [x] `0xCAFEBABE` hex. We won't support hex float/exponent literals!
 - [x] support underscores: `1_000_000`
+- [ ] support underscores in strings: `+"1_000_000"`?
+- [ ] what to do with too long int literals that can't fit in int64?
 
 Division
 

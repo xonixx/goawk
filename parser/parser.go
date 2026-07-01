@@ -778,9 +778,22 @@ func (p *parser) primary() ast.Expr {
 		p.next()
 		return &ast.NumExpr{Value: n}
 	case lexer.INT:
-		n, _ := strconv.ParseInt(p.val, 0, 64)
+		minus := false
+		val := p.val
+		if val[0] == '-' {
+			minus = true
+			val = val[1:]
+		}
+		n, err := strconv.ParseUint(val, 0, 64)
+		if err != nil {
+			panic(err) // TODO
+		}
+		v := int64(n)
+		if minus {
+			v = -v
+		}
 		p.next()
-		return &ast.NumIntExpr{Value: n}
+		return &ast.NumIntExpr{Value: v}
 	case lexer.STRING:
 		s := p.val
 		p.next()

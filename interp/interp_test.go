@@ -301,6 +301,7 @@ BEGIN {
 	// Number, string, and regex expressions
 	{`BEGIN { print 1, 1., .1, 1e0, -1, 1e }`, "", "1 1 0.1 1 -1 1\n", "", ""},
 	{`BEGIN { print 1_2.3_4, 0xAB, -0Xa_B, 0X_ff_Ff, 0xCAFEBABE, 0x15e-2 } # !gawk !posix`, "", "12.34 171 -171 65535 3405691582 348\n", "", ""},
+	{`BEGIN { print 0x80_00_00_00_00_00_00_00, -0x80_00_00_00_00_00_00_00 } # !gawk !posix`, "", "-9223372036854775808 -9223372036854775808\n", "", ""},
 	{`BEGIN { print '\"' '\'' 'xy' "z" "'" '\"' }`, "", "\"'xyz'\"\n", "", "invalid char"}, // Check support for single-quoted strings
 	{`BEGIN { print "0\n1\t2\r3\a4\b5\f6\v7\x408\xf" }  # !posix`, "", "0\n1\t2\r3\a4\b5\f6\v7@8\x0f\n", "", ""},
 	{`BEGIN { print "The \u201cQUICK\u201d brown fox \u1F602" }  # !gawk`, "", "The “QUICK” brown fox 😂\n", "", ""},
