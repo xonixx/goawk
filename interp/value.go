@@ -226,6 +226,9 @@ func (n number) toInt() int64 {
 	if n.typ == typeInt {
 		return n.l
 	}
+	if math.IsNaN(n.f) || math.IsInf(n.f, 0) {
+		return 0
+	}
 	return int64(n.f)
 }
 

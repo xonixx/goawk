@@ -362,11 +362,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.Divide:
 			l, r := p.peekPop()
-			rf := r.toNumber()
-			if rf.isZero() {
-				return newError("division by zero")
-			}
-			p.replaceTop(l.toNumber().divideFloat(rf).toValue())
+			p.replaceTop(l.toNumber().divideFloat(r.toNumber()).toValue())
 
 		case compiler.DivideInt:
 			l, r := p.peekPop()
@@ -1385,11 +1381,7 @@ func (p *interp) augAssignOp(op compiler.AugOp, l, r value) (value, error) {
 	case compiler.AugOpMul:
 		return l.toNumber().multiply(r.toNumber()).toValue(), nil
 	case compiler.AugOpDiv:
-		rf := r.toNumber()
-		if rf.isZero() {
-			return null(), newError("division by zero")
-		}
-		return l.toNumber().divideFloat(rf).toValue(), nil
+		return l.toNumber().divideFloat(r.toNumber()).toValue(), nil
 	case compiler.AugOpDivInt:
 		rf := r.toNumber()
 		if rf.isZero() {

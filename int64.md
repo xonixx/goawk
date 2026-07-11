@@ -27,6 +27,7 @@ Add number literals
 - [x] support underscores: `1_000_000`
 - [ ] support underscores in strings: `+"1_000_000"`?
 - [ ] what to do with too long int literals that can't fit in int64?
+- [ ] IEEE 754 for floats
 
 Division
 
