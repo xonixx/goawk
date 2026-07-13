@@ -407,7 +407,7 @@ func TestCommandLine(t *testing.T) {
 		{[]string{"-v"}, "", "", "flag needs an argument: -v"},
 		{[]string{"-z"}, "", "", "flag provided but not defined: -z"},
 		{[]string{"{ print }", "notexist"}, "", "", `file "notexist" not found`},
-		{[]string{"BEGIN { print 1/0 }"}, "", "", "division by zero"},
+		//{[]string{"BEGIN { print 1/0 }"}, "", "", "division by zero"},
 		{[]string{"-v", "foo", "BEGIN {}"}, "", "", "-v flag must be in format name=value"},
 		{[]string{"--", "{ print $1 }", "-file"}, "", "", `file "-file" not found`},
 		{[]string{"{ print $1 }", "-file"}, "", "", `file "-file" not found`},

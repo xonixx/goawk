@@ -293,9 +293,10 @@ BEGIN {
 	{`BEGIN { print "food"~/oo/, "food"~/[oO]+d/, "food"~"f", "food"~"F", "food"~0 }`, "", "1 1 1 0 0\n", "", ""},
 	{`BEGIN { print "food"!~/oo/, "food"!~/[oO]+d/, "food"!~"f", "food"!~"F", "food"!~0 }`, "", "0 0 0 1 1\n", "", ""},
 	// XXX int64 {`BEGIN { print 1+2*3/4^5%6 7, (1+2)*3/4^5%6 "7" }`, "", "1.005867 0.008789067\n", "", ""},
-	{`BEGIN { print 1/0 }`, "", "", "division by zero", "division by zero"},
+	{`BEGIN { print 1/0 } # !gawk !posix`, "", "inf\n", "", ""},
 	{`BEGIN { print 1%0 }`, "", "", "division by zero in mod", "division by zero"},
-	{`BEGIN { x /= 0 }`, "", "", "division by zero", "division by zero"},
+	{`BEGIN { x /= 0 } # !gawk !posix`, "", "", "", ""},
+	{`BEGIN { x //= 0 } # !gawk !posix`, "", "", "division by zero", ""},
 	{`BEGIN { x %= 0 }`, "", "", "division by zero in mod", "division by zero"},
 
 	// Number, string, and regex expressions
@@ -1124,6 +1125,11 @@ BEGIN { x[1]=3; f5(x); print x[1] }
 	{`{ print !$1 }  # +posix`, "0x0\n0x0.0p0\n0x1\n0x0.01\n", "1\n1\n0\n0\n", "", ""},
 	{`{ print 2 == $1 }  # +posix`, "0x1p1\n0x1P1\n", "1\n1\n", "", ""},
 	{`{ print $1<$2 }`, "1_0 2", "1\n", "", ""},
+
+	// IEEE 754
+	{`BEGIN { print 0, -.0, 1/0, 1/-.0, 0/0 } # !gawk !posix`, "", "0 -0.0 inf -inf nan\n", "", ""},
+	{`BEGIN { print 1/0 == 1/0, 0/0 == 0/0, 1/0 + 1/0, 1/0 + 1/-.0 } # !gawk !posix`, "", "1 0 inf nan\n", "", ""},
+	{`BEGIN { print (1/0|0, 1/-.0|0, 0/0|0) } # !gawk !posix`, "", "0 0 0\n", "", ""},
 }
 
 // Flags parses the "skip flags" in it.src's first comment and returns them as
