@@ -164,6 +164,9 @@ func (v value) str(floatFormat string) string {
 				return "inf"
 			}
 		case v.n == float64(int64(v.n)):
+			if v.n == .0 && 1/v.n < 0 {
+				return "-0.0"
+			}
 			return strconv.FormatInt(int64(v.n), 10)
 		default:
 			if floatFormat == "%.6g" {

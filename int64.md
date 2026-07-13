@@ -25,12 +25,15 @@ Add number literals
 
 - [x] `0xCAFEBABE` hex. We won't support hex float/exponent literals!
 - [x] support underscores: `1_000_000`
-- [ ] support underscores in strings: `+"1_000_000"`?
+- [x] support underscores in strings: `+"1_000_000"`?
+  - no, we won't support
 - [ ] what to do with too long int literals that can't fit in int64?
-- [ ] IEEE 754 for floats
+- [ ] IEEE 754 for floats (-0, 1/0, 0/0, etc.)
 
 Division
 
 - [x] TBD: `/` va `//` vs `/.`
   - `//` gives a conflict with regex literal
 - [ ] TBD: zero division
+  - floats: produce inf (1/0) or nan (0/0)
+  - ints: TBD
