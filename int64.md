@@ -28,7 +28,16 @@ Add number literals
 - [x] support underscores in strings: `+"1_000_000"`?
   - no, we won't support
 - [ ] what to do with too long int literals that can't fit in int64?
-- [ ] IEEE 754 for floats (-0, 1/0, 0/0, etc.)
+  - [ ] `999999999999999999999`
+    - `mawk`: `1e+21`
+    - `goawk`: `1e+21`
+    - `lua`: `1e+21`
+    - `gawk`: `1000000000000000000000`??
+  - [ ] `0xfffffffffffffffffff`
+    - `lua`: `-1` 
+    - `gawk`: `75557863725914323419136`
+    - `java`: TODO
+- [x] IEEE 754 for floats (-0, 1/0, 0/0, etc.)
 
 Division
 
