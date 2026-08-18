@@ -780,9 +780,16 @@ func (p *parser) primary() ast.Expr {
 	case lexer.INT:
 		val := p.val
 		n, err := strconv.ParseUint(val, 0, 64)
-		minus := p.prevTok == lexer.SUB
-		if err != nil || minus && n > 9223372036854775808 || !minus && n > 9223372036854775807 {
-			panic(p.errorf("integer number too large"))
+		isHex := len(val) > 2 && val[0] == '0' && (val[1] == 'x' || val[1] == 'X')
+		if isHex {
+			if err != nil {
+				panic(p.errorf("integer number too large"))
+			}
+		} else {
+			minus := p.prevTok == lexer.SUB
+			if err != nil || minus && n > 9223372036854775808 || !minus && n > 9223372036854775807 {
+				panic(p.errorf("integer number too large"))
+			}
 		}
 		v := int64(n)
 		p.next()
