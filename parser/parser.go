@@ -778,20 +778,13 @@ func (p *parser) primary() ast.Expr {
 		p.next()
 		return &ast.NumExpr{Value: n}
 	case lexer.INT:
-		minus := false
 		val := p.val
-		if val[0] == '-' {
-			minus = true
-			val = val[1:]
-		}
 		n, err := strconv.ParseUint(val, 0, 64)
-		if err != nil {
-			panic(err) // TODO
+		minus := p.prevTok == lexer.SUB
+		if err != nil || minus && n > 9223372036854775808 || !minus && n > 9223372036854775807 {
+			panic(p.errorf("integer number too large"))
 		}
 		v := int64(n)
-		if minus {
-			v = -v
-		}
 		p.next()
 		return &ast.NumIntExpr{Value: v}
 	case lexer.STRING:

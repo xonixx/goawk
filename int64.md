@@ -33,10 +33,13 @@ Add number literals
     - `goawk`: `1e+21`
     - `lua`: `1e+21`
     - `gawk`: `1000000000000000000000`??
+    - `python3`: `999999999999999999999`
+    - `java`: integer number too large
   - [ ] `0xfffffffffffffffffff`
     - `lua`: `-1` 
     - `gawk`: `75557863725914323419136`
-    - `java`: TODO
+    - `python3`: `75557863725914323419135`
+    - `java`: integer number too large
 - [x] IEEE 754 for floats (-0, 1/0, 0/0, etc.)
 
 Division
