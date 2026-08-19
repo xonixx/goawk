@@ -27,20 +27,36 @@ Add number literals
 - [x] support underscores: `1_000_000`
 - [x] support underscores in strings: `+"1_000_000"`?
   - no, we won't support
-- [ ] what to do with too long int literals that can't fit in int64?
-  - [ ] `999999999999999999999`
+- [x] what to do with too long int literals that can't fit in int64?
+  - resolution: fail at parse time
+  - [x] `999999999999999999999`
     - `mawk`: `1e+21`
     - `goawk`: `1e+21`
     - `lua`: `1e+21`
     - `gawk`: `1000000000000000000000`??
     - `python3`: `999999999999999999999`
     - `java`: integer number too large
-  - [ ] `0xfffffffffffffffffff`
+  - [x] `0xfffffffffffffffffff`
     - `lua`: `-1` 
     - `gawk`: `75557863725914323419136`
     - `python3`: `75557863725914323419135`
     - `java`: integer number too large
 - [x] IEEE 754 for floats (-0, 1/0, 0/0, etc.)
+- [ ] long ints interpolation in strings
+  - [ ] `BEGIN { print +"999999999999999999999999999" }`
+    - `goawk`: `1e+27`
+    - `mawk`: `1e+27`
+    - `busybox awk`: `1e+27`
+    - `gawk-posix`: `1000000000000000013287555072`
+    - `gawk`: `1000000000000000013287555072`
+    - `bwk`:  `1000000000000000013287555072`
+  - [ ] `BEGIN { print +"0xfffffffffffffffffffffffffffffffffffff" }`
+    - `goawk`: `3.56812e+44`
+    - `mawk`: `3,56812e+44`
+    - `busybox-awk`: `1.84467e+19`
+    - `gawk`: `0`
+    - `gawk-posix`: `356811923176489970264571492362373784095686656`
+    - `bwk`: `0`
 
 Division
 
