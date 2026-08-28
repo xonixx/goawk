@@ -316,6 +316,8 @@ BEGIN {
 	{`BEGIN { RS="x" } /^a.*c$/`, "a\nb\nc", "a\nb\nc\n", "", ""},
 	{`BEGIN { print "-12"+0, "+12"+0, " \t\r\n7foo"+0, ".5"+0, "5."+0, "+."+0 }`, "", "-12 12 7 0.5 5 0\n", "", ""},
 	{`BEGIN { print "1e3"+0, "1.2e-1"+0, "1e+1"+0, "1e"+0, "1e+"+0 }`, "", "1000 0.12 10 1 1\n", "", ""},
+	{`BEGIN { print +"999999999999999999999999999Y" } # !gawk !posix`, "", "1e+27\n", "", ""},
+	{`BEGIN { print +"0xfffffffffffffffffffffffffffffffffffffY" } # !gawk !posix`, "", "3.56812e+44\n", "", ""},
 	// XXX int64 {`BEGIN { print -(11102200000000000000000000000000000000 1040000) }  # !gawk - gawk supports big numbers`,
 	//	"", "-inf\n", "", ""},
 	{`BEGIN { print atan2(0, 8020020000000e20G-0)}`, "", "0\n", "", ""},

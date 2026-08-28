@@ -387,8 +387,11 @@ func parseNumberPrefix(s string) number {
 
 	floatStr := s[start:end]
 	if !gotDot && !gotExp {
-		l, _ := strconv.ParseInt(floatStr, 10, 64)
-		// todo if number is too large to fit in int64, shall we parse as float?
+		l, err := strconv.ParseInt(floatStr, 10, 64)
+		if err != nil { // if out of int range, parse as float
+			f, _ := strconv.ParseFloat(floatStr, 64)
+			return numberFloat(f) // Returns infinity in case of "value out of range" error
+		}
 		return numberInt(l)
 	}
 	f, _ := strconv.ParseFloat(floatStr, 64)
@@ -445,7 +448,12 @@ func parseHexNumberPrefix(s string, start, i int) number {
 
 	floatStr := s[start:end]
 	if !gotDot && !gotExp {
-		l, _ := strconv.ParseInt(floatStr, 0, 64)
+		l, err := strconv.ParseInt(floatStr, 0, 64)
+		if err != nil { // if out of int range, parse as float
+			floatStr += "p0" // AWK allows "0x12", ParseFloat requires "0x12p0"
+			f, _ := strconv.ParseFloat(floatStr, 64)
+			return numberFloat(f) // Returns infinity in case of "value out of range" error
+		}
 		return numberInt(l)
 	}
 	if !gotExponent {
