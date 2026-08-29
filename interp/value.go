@@ -136,15 +136,22 @@ func parseNumber(s string) (number, error) {
 		if err == nil && strings.IndexByte(s, '_') >= 0 {
 			// Underscore separators aren't supported by AWK.
 			return numberInt(0), strconv.ErrSyntax
-		} // TODO allow
-		// todo if number is too large to fit in int64, shall we parse as float?
+		}
+		if err != nil { // int overflow -> parse as float
+			n, err := strconv.ParseFloat(s, 64)
+			if err == nil && strings.IndexByte(s, '_') >= 0 {
+				// Underscore separators aren't supported by AWK.
+				return numberInt(0), strconv.ErrSyntax
+			}
+			return numberFloat(n), err
+		}
 		return numberInt(l), err
 	} else { // float
 		n, err := strconv.ParseFloat(s, 64)
 		if err == nil && strings.IndexByte(s, '_') >= 0 {
 			// Underscore separators aren't supported by AWK.
 			return numberInt(0), strconv.ErrSyntax
-		} // TODO allow
+		}
 		return numberFloat(n), err
 	}
 }

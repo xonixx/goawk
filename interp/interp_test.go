@@ -322,6 +322,13 @@ BEGIN {
 	//	"", "-inf\n", "", ""},
 	{`BEGIN { print atan2(0, 8020020000000e20G-0)}`, "", "0\n", "", ""},
 	{`BEGIN { print 1e1000, -1e1000 }  # !gawk`, "", "inf -inf\n", "", ""},
+
+	// int + strnum
+	// 24 ones and 23 twos
+	{`BEGIN { split("111111111111111111111111 22222222222222222222222",a); print (a[1] > a[2]) }`, "", "1\n", "", ""},
+	// all awks will give 0 because they parse the numbers as float. The first number is 1<<60, all traditional awks can handle only <=52-bit precision without loss
+	{`BEGIN { split("1152921504606846976 1152921504606846975",a); print (a[1] > a[2]) } # !gawk !posix`, "", "1\n", "", ""},
+
 	{`BEGIN { printf "\x0.\x00.\x0A\x10\xff\xFF\x41" }  # !awk !posix`, "", "\x00.\x00.\n\x10\xff\xffA", "", ""},
 	{`BEGIN { printf "\x1.\x01.\x0A\x10\xff\xFF\x41" }  # !posix`, "", "\x01.\x01.\n\x10\xff\xffA", "", ""},
 	{`BEGIN { printf "\0\78\7\77\777\0 \141 " }  # !awk`, "", "\x00\a8\a?\xff\x00 a ", "", ""},

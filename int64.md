@@ -42,21 +42,29 @@ Add number literals
     - `python3`: `75557863725914323419135`
     - `java`: integer number too large
 - [x] IEEE 754 for floats (-0, 1/0, 0/0, etc.)
-- [ ] long ints interpolation in strings
-  - [ ] `BEGIN { print +"999999999999999999999999999" }`
+- [x] long ints interpolation in strings
+  - [x] `BEGIN { print +"999999999999999999999999999" }`
     - `goawk`: `1e+27`
     - `mawk`: `1e+27`
     - `busybox awk`: `1e+27`
     - `gawk-posix`: `1000000000000000013287555072`
     - `gawk`: `1000000000000000013287555072`
     - `bwk`:  `1000000000000000013287555072`
-  - [ ] `BEGIN { print +"0xfffffffffffffffffffffffffffffffffffff" }`
+  - [x] `BEGIN { print +"0xfffffffffffffffffffffffffffffffffffff" }`
     - `goawk`: `3.56812e+44`
     - `mawk`: `3,56812e+44`
     - `busybox-awk`: `1.84467e+19`
     - `gawk`: `0`
     - `gawk-posix`: `356811923176489970264571492362373784095686656`
     - `bwk`: `0`
+- [x] `BEGIN { split("111111111111111111111111 22222222222222222222222",a); print (a[1] > a[2]) }`
+  - `goawk`      : `1`
+  - `mawk`       : `1`
+  - `busybox-awk`: `1`
+  - `gawk`       : `1`
+  - `gawk-posix` : `1`
+  - `bwk`        : `1`
+
 
 Division
 
