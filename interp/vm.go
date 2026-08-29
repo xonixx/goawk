@@ -410,8 +410,8 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.Equals:
 			l, r := p.peekPop()
-			ln, lIsStr := l.isTrueStrNew()
-			rn, rIsStr := r.isTrueStrNew()
+			ln, lIsStr := l.isTrueStr()
+			rn, rIsStr := r.isTrueStr()
 			if lIsStr || rIsStr {
 				p.replaceTop(boolean(p.toString(l) == p.toString(r)))
 			} else if ln.typ != rn.typ {
@@ -424,8 +424,8 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.NotEquals:
 			l, r := p.peekPop()
-			ln, lIsStr := l.isTrueStrNew()
-			rn, rIsStr := r.isTrueStrNew()
+			ln, lIsStr := l.isTrueStr()
+			rn, rIsStr := r.isTrueStr()
 			if lIsStr || rIsStr {
 				p.replaceTop(boolean(p.toString(l) != p.toString(r)))
 			} else if ln.typ != rn.typ {
@@ -438,8 +438,8 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.Less:
 			l, r := p.peekPop()
-			ln, lIsStr := l.isTrueStrNew()
-			rn, rIsStr := r.isTrueStrNew()
+			ln, lIsStr := l.isTrueStr()
+			rn, rIsStr := r.isTrueStr()
 			if lIsStr || rIsStr {
 				p.replaceTop(boolean(p.toString(l) < p.toString(r)))
 			} else if ln.typ != rn.typ {
@@ -452,8 +452,8 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.Greater:
 			l, r := p.peekPop()
-			ln, lIsStr := l.isTrueStrNew()
-			rn, rIsStr := r.isTrueStrNew()
+			ln, lIsStr := l.isTrueStr()
+			rn, rIsStr := r.isTrueStr()
 			if lIsStr || rIsStr {
 				p.replaceTop(boolean(p.toString(l) > p.toString(r)))
 			} else if ln.typ != rn.typ {
@@ -466,8 +466,8 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.LessOrEqual:
 			l, r := p.peekPop()
-			ln, lIsStr := l.isTrueStrNew()
-			rn, rIsStr := r.isTrueStrNew()
+			ln, lIsStr := l.isTrueStr()
+			rn, rIsStr := r.isTrueStr()
 			if lIsStr || rIsStr {
 				p.replaceTop(boolean(p.toString(l) <= p.toString(r)))
 			} else if ln.typ != rn.typ {
@@ -480,8 +480,8 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.GreaterOrEqual:
 			l, r := p.peekPop()
-			ln, lIsStr := l.isTrueStrNew()
-			rn, rIsStr := r.isTrueStrNew()
+			ln, lIsStr := l.isTrueStr()
+			rn, rIsStr := r.isTrueStr()
 			if lIsStr || rIsStr {
 				p.replaceTop(boolean(p.toString(l) >= p.toString(r)))
 			} else if ln.typ != rn.typ {
@@ -564,8 +564,8 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			offset := code[ip]
 			ip++
 			l, r := p.popTwo()
-			ln, lIsStr := l.isTrueStrNew()
-			rn, rIsStr := r.isTrueStrNew()
+			ln, lIsStr := l.isTrueStr()
+			rn, rIsStr := r.isTrueStr()
 			var b bool
 			if lIsStr || rIsStr {
 				b = p.toString(l) == p.toString(r)
@@ -584,8 +584,8 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			offset := code[ip]
 			ip++
 			l, r := p.popTwo()
-			ln, lIsStr := l.isTrueStrNew()
-			rn, rIsStr := r.isTrueStrNew()
+			ln, lIsStr := l.isTrueStr()
+			rn, rIsStr := r.isTrueStr()
 			var b bool
 			if lIsStr || rIsStr {
 				b = p.toString(l) != p.toString(r)
@@ -604,8 +604,8 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			offset := code[ip]
 			ip++
 			l, r := p.popTwo()
-			ln, lIsStr := l.isTrueStrNew()
-			rn, rIsStr := r.isTrueStrNew()
+			ln, lIsStr := l.isTrueStr()
+			rn, rIsStr := r.isTrueStr()
 			var b bool
 			if lIsStr || rIsStr {
 				b = p.toString(l) < p.toString(r)
@@ -624,8 +624,8 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			offset := code[ip]
 			ip++
 			l, r := p.popTwo()
-			ln, lIsStr := l.isTrueStrNew()
-			rn, rIsStr := r.isTrueStrNew()
+			ln, lIsStr := l.isTrueStr()
+			rn, rIsStr := r.isTrueStr()
 			var b bool
 			if lIsStr || rIsStr {
 				b = p.toString(l) > p.toString(r)
@@ -644,8 +644,8 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			offset := code[ip]
 			ip++
 			l, r := p.popTwo()
-			ln, lIsStr := l.isTrueStrNew()
-			rn, rIsStr := r.isTrueStrNew()
+			ln, lIsStr := l.isTrueStr()
+			rn, rIsStr := r.isTrueStr()
 			var b bool
 			if lIsStr || rIsStr {
 				b = p.toString(l) <= p.toString(r)
@@ -664,8 +664,8 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			offset := code[ip]
 			ip++
 			l, r := p.popTwo()
-			ln, lIsStr := l.isTrueStrNew()
-			rn, rIsStr := r.isTrueStrNew()
+			ln, lIsStr := l.isTrueStr()
+			rn, rIsStr := r.isTrueStr()
 			var b bool
 			if lIsStr || rIsStr {
 				b = p.toString(l) >= p.toString(r)

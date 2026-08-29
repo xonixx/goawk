@@ -79,7 +79,7 @@ func (v value) String() string {
 // Return true if value is a "true string" (a string or a "numeric string"
 // from an input field that can't be converted to a number). If false,
 // also return the (possibly converted) number.
-func (v value) isTrueStrNew() (number, bool) {
+func (v value) isTrueStr() (number, bool) {
 	switch v.typ {
 	case typeStr:
 		return numberInt(0), true

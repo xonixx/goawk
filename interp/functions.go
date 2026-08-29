@@ -424,7 +424,7 @@ func (p *interp) sprintf(format string, args []value) (string, error) {
 			v = uint64(a.toNumber().toInt())
 		case 'c':
 			var c []byte
-			n, isStr := a.isTrueStrNew()
+			n, isStr := a.isTrueStr()
 			if isStr {
 				s := p.toString(a)
 				if len(s) == 0 {
