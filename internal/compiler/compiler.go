@@ -704,12 +704,6 @@ func (c *compiler) expr(expr ast.Expr) {
 			// Optimize $i to FieldInt opcode with integer argument
 			c.add(FieldInt, opcodeInt(int(index.Value)))
 			return
-		case *ast.NumExpr: // TODO is this still needed?
-			if index.Value == float64(Opcode(index.Value)) {
-				// Optimize $i to FieldInt opcode with integer argument
-				c.add(FieldInt, opcodeInt(int(index.Value)))
-				return
-			}
 		}
 		c.expr(e.Index)
 		c.add(Field)
