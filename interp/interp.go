@@ -808,7 +808,7 @@ func (p *interp) setVarByName(name, value string) error {
 func (p *interp) setSpecial(index int, v value) error {
 	switch index {
 	case ast.V_NF:
-		numFields := int(v.toNumber().toInt())
+		numFields := int(v.toInt())
 		if numFields < 0 {
 			return newError("NF set to negative value: %d", numFields)
 		}
@@ -836,7 +836,7 @@ func (p *interp) setSpecial(index int, v value) error {
 	case ast.V_FNR:
 		p.fileLineNum = v
 	case ast.V_ARGC:
-		argc := v.toNumber().toInt()
+		argc := v.toInt()
 		if argc > maxFieldIndex {
 			return newError("ARGC set too large: %d", argc)
 		}

@@ -71,29 +71,29 @@ func (p *interp) toNative(v value, typ reflect.Type) reflect.Value {
 	case reflect.Bool:
 		return reflect.ValueOf(v.boolean())
 	case reflect.Int:
-		return reflect.ValueOf(int(v.toNumber().toInt()))
+		return reflect.ValueOf(int(v.toInt()))
 	case reflect.Int8:
-		return reflect.ValueOf(int8(v.toNumber().toInt()))
+		return reflect.ValueOf(int8(v.toInt()))
 	case reflect.Int16:
-		return reflect.ValueOf(int16(v.toNumber().toInt()))
+		return reflect.ValueOf(int16(v.toInt()))
 	case reflect.Int32:
-		return reflect.ValueOf(int32(v.toNumber().toInt()))
+		return reflect.ValueOf(int32(v.toInt()))
 	case reflect.Int64:
-		return reflect.ValueOf(v.toNumber().toInt())
+		return reflect.ValueOf(v.toInt())
 	case reflect.Uint:
-		return reflect.ValueOf(uint(v.toNumber().toInt()))
+		return reflect.ValueOf(uint(v.toInt()))
 	case reflect.Uint8:
-		return reflect.ValueOf(uint8(v.toNumber().toInt()))
+		return reflect.ValueOf(uint8(v.toInt()))
 	case reflect.Uint16:
-		return reflect.ValueOf(uint16(v.toNumber().toInt()))
+		return reflect.ValueOf(uint16(v.toInt()))
 	case reflect.Uint32:
-		return reflect.ValueOf(uint32(v.toNumber().toInt()))
+		return reflect.ValueOf(uint32(v.toInt()))
 	case reflect.Uint64:
-		return reflect.ValueOf(uint64(v.toNumber().toInt()))
+		return reflect.ValueOf(uint64(v.toInt()))
 	case reflect.Float32:
-		return reflect.ValueOf(float32(v.toNumber().toFloat()))
+		return reflect.ValueOf(float32(v.toFloat()))
 	case reflect.Float64:
-		return reflect.ValueOf(v.toNumber().toFloat())
+		return reflect.ValueOf(v.toFloat())
 	case reflect.String:
 		return reflect.ValueOf(p.toString(v))
 	case reflect.Slice:
@@ -417,11 +417,11 @@ func (p *interp) sprintf(format string, args []value) (string, error) {
 		case 's':
 			v = p.toString(a)
 		case 'd':
-			v = a.toNumber().toInt()
+			v = a.toInt()
 		case 'f':
-			v = a.toNumber().toFloat()
+			v = a.toFloat()
 		case 'u':
-			v = uint64(a.toNumber().toInt())
+			v = uint64(a.toInt())
 		case 'c':
 			var c []byte
 			n, isStr := a.isTrueStr()

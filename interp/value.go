@@ -202,6 +202,35 @@ func (v value) toNumber() number {
 	}
 }
 
+// Return value's int value, converting from string if necessary
+func (v value) toInt() int64 {
+	switch v.typ {
+	case typeStr, typeNumStr:
+		// Ensure string starts with a number and convert it
+		return parseNumberPrefix(v.s).toInt()
+	case typeNumInt:
+		return v.l
+	default: // typeNum, typeNull
+		if math.IsNaN(v.n) || math.IsInf(v.n, 0) {
+			return 0
+		}
+		return int64(v.n)
+	}
+}
+
+// Return value's float value, converting from string if necessary
+func (v value) toFloat() float64 {
+	switch v.typ {
+	case typeStr, typeNumStr:
+		// Ensure string starts with a number and convert it
+		return parseNumberPrefix(v.s).toFloat()
+	case typeNumInt:
+		return float64(v.l)
+	default: // typeNum, typeNull
+		return v.n
+	}
+}
+
 type numberType uint8
 
 const (
