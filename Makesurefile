@@ -1,0 +1,54 @@
+
+@goal default
+@depends_on goawk
+@depends_on awk2
+@depends_on cals_stat
+
+@define CPUNO 17
+@define STATF '/tmp/awk2.txt'
+@define BENCH './scripts/int64/b1.awk'
+
+@goal goawk
+  > "$STATF"
+  for i in `seq 3`
+  do
+    /usr/bin/time -f 'goawk: time=%esec mem=%MKB' taskset -c "$CPUNO" goawk -f "$BENCH"    |& tee -a "$STATF"
+  done
+
+@goal awk2
+@depends_on built
+  for i in `seq 3`
+  do
+    /usr/bin/time -f 'awk2 : time=%esec mem=%MKB' taskset -c "$CPUNO" ./goawk -f "$BENCH" |& tee -a "$STATF"
+  done
+
+@goal built
+  go build
+
+@goal cals_stat
+  awk '
+    /goawk/ { goawk += substr($0,13) }
+    /awk2/  { awk2  += substr($0,13) }
+    END { print (awk2 / goawk) " slower" }
+  ' "$STATF"
+
+@goal profcpu
+@doc 'profile cpu'
+  go test ./interp -bench='BenchmarkAfterInt64' \
+    -cpuprofile=/tmp/cpu.out \
+
+  go tool pprof -http=:8080 /tmp/cpu.out
+
+@goal profmem
+@doc 'profile mem'
+  go test ./interp -bench='BenchmarkAfterInt64' \
+     -memprofile=/tmp/mem.out \
+
+  go tool pprof -http=:8081 /tmp/mem.out
+
+@goal printinline
+#  go build -gcflags="-m=2" ./... |& grep 'inlin'
+  go build -gcflags="-m=2" ./... |& grep 'inlining'
+#  go build -gcflags="-m=2" ./... |& grep 'can inline'
+#  go build -gcflags="-m=2" ./... |& grep 'cannot inlin'
+
