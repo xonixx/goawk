@@ -15,3 +15,5 @@ scripts/csvbench/bin
 scripts/csvbench/count.csv
 /default.pgo
 /goawk-versions
+benchmarks_*.txt
+*.iml
