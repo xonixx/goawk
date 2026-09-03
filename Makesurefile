@@ -34,7 +34,9 @@
 
 @goal profcpu
 @doc 'profile cpu'
+  # `-run '^$'` to skip running tests and only run the bench
   go test ./interp -bench='BenchmarkAfterInt64' \
+    -run '^$' \
     -cpuprofile=/tmp/cpu.out \
 
   go tool pprof -http=:8080 /tmp/cpu.out
@@ -42,7 +44,8 @@
 @goal profmem
 @doc 'profile mem'
   go test ./interp -bench='BenchmarkAfterInt64' \
-     -memprofile=/tmp/mem.out \
+    -run '^$' \
+    -memprofile=/tmp/mem.out \
 
   go tool pprof -http=:8081 /tmp/mem.out
 
