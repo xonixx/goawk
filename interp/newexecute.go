@@ -75,6 +75,8 @@ func (p *Interpreter) Array(name string) map[string]any {
 		switch v.typ {
 		case typeNum:
 			result[k] = v.n
+		case typeNumInt:
+			result[k] = float64(v.l)
 		case typeStr, typeNumStr:
 			result[k] = v.s
 		default:
