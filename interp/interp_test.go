@@ -3492,6 +3492,23 @@ func BenchmarkCSVOutputWriter(b *testing.B) {
 	}
 }
 
+func BenchmarkAfterInt64(b *testing.B) {
+	b.StopTimer()
+	benchmarkProgram(b, nil, "", "1", `
+BEGIN {
+  a = 1.23
+#  a = 2
+  b = 0
+#  N = 10000000
+#  N = 5*10000000
+  for (i = 0; i < %d; i++) {
+    b += a * 2
+  }
+  print (b > 0)
+}
+`, b.N)
+}
+
 func normalizeNewlines(s string) string {
 	return strings.ReplaceAll(s, "\r\n", "\n")
 }
