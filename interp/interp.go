@@ -1077,6 +1077,9 @@ func (p *interp) joinFields(fields []string) string {
 
 // Convert value to string using current CONVFMT
 func (p *interp) toString(v value) string {
+	if v.typ == typeNumInt {
+		return strconv.FormatInt(v.l, 10)
+	}
 	if v.typ != typeNum {
 		// For typeStr and typeNumStr we already have the string, for
 		// typeNull v.s == "".
@@ -1087,6 +1090,9 @@ func (p *interp) toString(v value) string {
 
 // Convert value to string using current OFMT (used by "print")
 func (p *interp) toOutputString(v value) string {
+	if v.typ == typeNumInt {
+		return strconv.FormatInt(v.l, 10)
+	}
 	if v.typ != typeNum {
 		return v.s
 	}

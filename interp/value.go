@@ -163,8 +163,8 @@ func (v value) str(floatFormat string) string {
 	if v.typ == typeNum {
 		return numToStr(v.n, floatFormat)
 	} else if v.typ == typeNumInt {
-return strconv.FormatInt(v.l, 10)
-}
+		return strconv.FormatInt(v.l, 10)
+	}
 	// For typeStr and typeNumStr we already have the string, for
 	// typeNull v.s == "".
 	return v.s
@@ -182,12 +182,10 @@ func numToStr(n float64, floatFormat string) string {
 		} else {
 			return "inf"
 		}
-		case n == float64(int64(n)):
-			if n == .0 && 1/n < 0 {
-				return "-0.0"
-			}
-			return strconv.FormatInt(int64(n), 10)
 	case n == float64(int64(n)):
+		if n == .0 && 1/n < 0 {
+			return "-0.0"
+		}
 		return strconv.FormatInt(int64(n), 10)
 	case floatFormat == "%.6g": // speed up the default case
 		return strconv.FormatFloat(n, 'g', 6, 64)
