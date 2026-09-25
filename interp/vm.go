@@ -3,9 +3,9 @@
 package interp
 
 import (
+	"errors"
 	"io"
 	"math"
-	"os"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -1342,8 +1342,9 @@ func (p *interp) getline(redirect lexer.Token) (int64, string, error) {
 		name := p.toString(p.pop())
 		scanner, err := p.getInputScannerFile(name)
 		if err != nil {
-			if _, ok := err.(*os.PathError); ok {
-				// File not found is not a hard error, getline just returns -1.
+			if errors.Is(err, errCantOpen) {
+				// Not being able to open the file is not a hard error,
+				// getline just returns -1 as in other AWK implementations.
 				// See: https://github.com/benhoyt/goawk/issues/41
 				return -1, "", nil
 			}

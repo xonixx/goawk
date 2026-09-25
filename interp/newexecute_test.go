@@ -115,13 +115,13 @@ func TestGetArrayValue(t *testing.T) {
 	interpreter := newInterp(t, `
 BEGIN { Arr["key"]; f(); g(Arr) }
 function f() { Arr["hello"]="world" }
-function g(arr) { arr["a"]=1.23 }`)
+function g(arr) { arr["a"]=1.23; arr["b"]=7 }`)
 	_, err := interpreter.Execute(nil)
 	if err != nil {
 		t.Fatalf("error executing: %v", err)
 	}
 	arr := interpreter.Array("Arr")
-	if len(arr) != 3 {
+	if len(arr) != 4 {
 		t.Errorf("expected length 3, got %d", len(arr))
 	}
 	if arr["key"] != "" {
@@ -132,6 +132,9 @@ function g(arr) { arr["a"]=1.23 }`)
 	}
 	if math.Abs(arr["a"].(float64)-1.23) > 1e-9 {
 		t.Errorf("expected value 1.23, got %f", arr["a"])
+	}
+	if math.Abs(arr["b"].(float64)-7.0) > 1e-9 {
+		t.Errorf("expected value 7.0, got %f", arr["b"])
 	}
 	if interpreter.Array("NonExistent") != nil {
 		t.Errorf("non existent name must resolve to nil")
