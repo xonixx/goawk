@@ -318,6 +318,21 @@ func (n number) add(a number) number {
 	return numberFloat(n.f + a.f)
 }
 
+// value add
+func (n value) add(a value) value {
+	if n.typ.isStr() || a.typ.isStr() {
+		// slow path
+		return n.toNumber().add(a.toNumber()).toValue()
+	}
+	if n.typ != a.typ {
+		return num(n.toFloat() + a.toFloat())
+	}
+	if n.typ == typeNumInt {
+		return numInt(n.l + a.l)
+	}
+	return num(n.n + a.n)
+}
+
 // number subtract
 func (n number) subtract(a number) number {
 	if n.typ != a.typ {
@@ -338,6 +353,25 @@ func (n number) multiply(a number) number {
 		return numberInt(n.l * a.l)
 	}
 	return numberFloat(n.f * a.f)
+}
+
+// value multiply
+func (n value) multiply(a value) value {
+	if n.typ.isStr() || a.typ.isStr() {
+		// slow path
+		return n.toNumber().multiply(a.toNumber()).toValue()
+	}
+	if n.typ != a.typ {
+		return num(n.toFloat() * a.toFloat())
+	}
+	if n.typ == typeNumInt {
+		return numInt(n.l * a.l)
+	}
+	return num(n.n * a.n)
+}
+
+func (t valueType) isStr() bool {
+	return t == typeStr || t == typeNumStr
 }
 
 // float divide

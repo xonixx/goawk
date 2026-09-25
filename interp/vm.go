@@ -215,7 +215,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			ip++
 			index := int(p.pop().toInt())
 			v := p.getField(index)
-			err := p.setField(index, p.toString(v.toNumber().add(numberInt(int64(amount))).toValue()))
+			err := p.setField(index, p.toString(v.add(numInt(int64(amount)))))
 			if err != nil {
 				return err
 			}
@@ -224,20 +224,20 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			amount := code[ip]
 			index := code[ip+1]
 			ip += 2
-			p.globals[index] = p.globals[index].toNumber().add(numberInt(int64(amount))).toValue()
+			p.globals[index] = p.globals[index].add(numInt(int64(amount)))
 
 		case compiler.IncrLocal:
 			amount := code[ip]
 			index := code[ip+1]
 			ip += 2
-			p.frame[index] = p.frame[index].toNumber().add(numberInt(int64(amount))).toValue()
+			p.frame[index] = p.frame[index].add(numInt(int64(amount)))
 
 		case compiler.IncrSpecial:
 			amount := code[ip]
 			index := int(code[ip+1])
 			ip += 2
 			v := p.getSpecial(index)
-			err := p.setSpecial(index, v.toNumber().add(numberInt(int64(amount))).toValue())
+			err := p.setSpecial(index, v.add(numInt(int64(amount))))
 			if err != nil {
 				return err
 			}
@@ -248,7 +248,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			ip += 2
 			array := p.arrays[arrayIndex]
 			index := p.toString(p.pop())
-			array[index] = array[index].toNumber().add(numberInt(int64(amount))).toValue()
+			array[index] = array[index].add(numInt(int64(amount)))
 
 		case compiler.IncrArrayLocal:
 			amount := code[ip]
@@ -256,7 +256,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 			ip += 2
 			array := p.localArray(int(arrayIndex))
 			index := p.toString(p.pop())
-			array[index] = array[index].toNumber().add(numberInt(int64(amount))).toValue()
+			array[index] = array[index].add(numInt(int64(amount)))
 
 		case compiler.AugAssignField:
 			operation := compiler.AugOp(code[ip])
@@ -350,7 +350,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.Add:
 			l, r := p.peekPop()
-			p.replaceTop(l.toNumber().add(r.toNumber()).toValue())
+			p.replaceTop(l.add(r))
 
 		case compiler.Subtract:
 			l, r := p.peekPop()
@@ -358,7 +358,7 @@ func (p *interp) execute(code []compiler.Opcode) error {
 
 		case compiler.Multiply:
 			l, r := p.peekPop()
-			p.replaceTop(l.toNumber().multiply(r.toNumber()).toValue())
+			p.replaceTop(l.multiply(r))
 
 		case compiler.Divide:
 			l, r := p.peekPop()
@@ -1376,11 +1376,11 @@ func (p *interp) getline(redirect lexer.Token) (int64, string, error) {
 func (p *interp) augAssignOp(op compiler.AugOp, l, r value) (value, error) {
 	switch op {
 	case compiler.AugOpAdd:
-		return l.toNumber().add(r.toNumber()).toValue(), nil
+		return l.add(r), nil
 	case compiler.AugOpSub:
 		return l.toNumber().subtract(r.toNumber()).toValue(), nil
 	case compiler.AugOpMul:
-		return l.toNumber().multiply(r.toNumber()).toValue(), nil
+		return l.multiply(r), nil
 	case compiler.AugOpDiv:
 		return l.toNumber().divideFloat(r.toNumber()).toValue(), nil
 	case compiler.AugOpDivInt:
