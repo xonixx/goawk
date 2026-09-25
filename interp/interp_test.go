@@ -8,14 +8,17 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"reflect"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
 	"testing"
+	"testing/fstest"
 
 	"github.com/benhoyt/goawk/interp"
 	"github.com/benhoyt/goawk/parser"
@@ -93,6 +96,10 @@ NR==3, NR==5 { print NR }
 	{`BEGIN { printf "%3d", 42 }`, "", " 42", "", ""},
 	{`BEGIN { printf "%3s", "x" }`, "", "  x", "", ""},
 	{`BEGIN { printf "%.1g", 42 }  # !windows-gawk`, "", "4e+01", "", ""}, // for some reason gawk gives "4e+001" on Windows
+	{`BEGIN { printf "%g", 12345.678 }`, "", "12345.7", "", ""},           // bare %g defaults to 6 significant digits (like C/awk)
+	{`BEGIN { printf "%G", 12345.678 }`, "", "12345.7", "", ""},
+	{`BEGIN { printf "%g", 0.666666666666 }`, "", "0.666667", "", ""},
+	{`BEGIN { printf "%g %g", 3.14159265358979, 100000 }`, "", "3.14159 100000", "", ""},
 	{`BEGIN { printf "%d", 12, 34 }`, "", "12", "", ""},
 	{`BEGIN { printf "%d" }`, "", "", "format error: got 0 args, expected 1", "not enough arg"},
 	// Our %c handling is mostly like awk's, except for multiples
@@ -294,7 +301,7 @@ BEGIN {
 	{`BEGIN { print "The \u201cQUICK\u201d brown fox \u1F602" }  # !gawk`, "", "The “QUICK” brown fox 😂\n", "", ""},
 	{`{ print /foo/ }`, "food\nfoo\nxfooz\nbar\n", "1\n1\n1\n0\n", "", ""},
 	{`/[a-/`, "foo", "", "parse error at 1:1: error parsing regexp: invalid character class range: `a-)`", "terminated"},
-	{`/\Q/  # !gawk`, "", "", "parse error at 1:1: error parsing regexp: missing closing ): `(?s:\\Q)`", ""}, // Gawk produces a warning (not an error), so skip
+	{`/\Q/`, "", "", "parse error at 1:1: error parsing regexp: missing closing ): `(?s:\\Q)`", ""},
 	{`/=foo/`, "=foo", "=foo\n", "", ""},
 	{`BEGIN { RS="x" } /^a.*c$/`, "a\nb\nc", "a\nb\nc\n", "", ""},
 	{`BEGIN { print "-12"+0, "+12"+0, " \t\r\n7foo"+0, ".5"+0, "5."+0, "+."+0 }`, "", "-12 12 7 0.5 5 0\n", "", ""},
@@ -333,7 +340,35 @@ BEGIN {
 	print CONVFMT, 1.2345678 ""
 	CONVFMT = "%.3g"
 	print CONVFMT, 1.234567 ""
-}`, "", "%.6g 1.23457\n%.3g 1.23\n", "", ""},
+	CONVFMT = "%g"
+	print CONVFMT, 12345.678 ""
+}`, "", "%.6g 1.23457\n%.3g 1.23\n%g 12345.7\n", "", ""},
+	// A CONVFMT that isn't a plain float conversion still converts like other AWKs
+	{`BEGIN { CONVFMT = "%d"; print 1234.5678 "" }`, "", "1234\n", "", ""},
+	{`BEGIN { CONVFMT = "%i"; print 1234.5678 "" }`, "", "1234\n", "", ""},
+	{`BEGIN { CONVFMT = "%u"; print 1234.5678 "" }`, "", "1234\n", "", ""},
+	{`BEGIN { CONVFMT = "%x"; print 1234.5678 "" }`, "", "4d2\n", "", ""},
+	{`BEGIN { CONVFMT = "%o"; print 1234.5678 "" }`, "", "2322\n", "", ""},
+	{`BEGIN { CONVFMT = "%e"; print 1234.5678 "" }  # !windows-gawk`, "", "1.234568e+03\n", "", ""},
+	{`BEGIN { CONVFMT = "x%dy"; print 1234.5678 "" }`, "", "x1234y\n", "", ""},
+	{`BEGIN { CONVFMT = "abc"; print 1234.5678 "" }`, "", "abc\n", "", ""},
+	{`BEGIN { CONVFMT = ""; print "[" 1234.5678 "" "]" }`, "", "[]\n", "", ""},
+	{`BEGIN { CONVFMT = "%%"; print 1234.5678 "" }`, "", "%\n", "", ""},
+	// As with printf, our %c is byte-based unless -chars is given (like mawk, unlike Gawk)
+	{`BEGIN { CONVFMT = "%c"; print 1234.5678 "" }  # !gawk`, "", "\xd2\n", "", ""},
+	// An invalid conversion is used as a literal string, like Gawk (--posix Gawk is a fatal error)
+	{`BEGIN { CONVFMT = "%z"; print 1234.5678 "" }  # !posix`, "", "%z\n", "", ""},
+	// So is a format needing more than one argument (here Gawk is a fatal error either way)
+	{`BEGIN { CONVFMT = "%d %d"; print 1234.5678 "" }  # !awk !gawk`, "", "%d %d\n", "", ""},
+	// A CONVFMT with an %s conversion would recurse, as %s converts using CONVFMT.
+	// We produce an empty string; Gawk and mawk print nothing at all here.
+	{`BEGIN { CONVFMT = "%s"; print "[" 1234.5678 "" "]" }  # !awk !gawk`, "", "[]\n", "", ""},
+	{`BEGIN { CONVFMT = "x%sy"; print "[" 1234.5678 "" "]" }  # !awk !gawk`, "", "[]\n", "", ""},
+	// Integers and inf/nan never use CONVFMT
+	{`BEGIN { CONVFMT = "%c"; print 65 "" }`, "", "65\n", "", ""},
+	{`BEGIN { CONVFMT = "%d"; print log(0) "" }  # !awk !gawk`, "", "-inf\n", "", ""},
+	// CONVFMT is used for array subscripts too
+	{`BEGIN { CONVFMT = "%d"; a[1.5] = 1; for (k in a) print k }`, "", "1\n", "", ""},
 	{`BEGIN { FILENAME = "foo"; print FILENAME }`, "", "foo\n", "", ""},
 	{`BEGIN { FILENAME = "123.0"; print (FILENAME==123) }`, "", "0\n", "", ""},
 	// Other FILENAME behaviour is tested in goawk_test.go
@@ -362,7 +397,18 @@ BEGIN {
 	print OFMT, 1.2345678
 	OFMT = "%.3g"
 	print OFMT, 1.234567
-}`, "", "%.6g 1.23457\n%.3g 1.23\n", "", ""},
+	OFMT = "%G"
+	print OFMT, 0.666666666666
+}`, "", "%.6g 1.23457\n%.3g 1.23\n%G 0.666667\n", "", ""},
+	{`BEGIN { OFMT = "%e"; print OFMT, 12345.678 }  # !windows-gawk`, "", "%e 1.234568e+04\n", "", ""}, // Windows Gawk prints exponent as "+004"
+	// An OFMT that isn't a plain float conversion, as with CONVFMT above
+	{`BEGIN { OFMT = "%d"; print 1234.5678 }`, "", "1234\n", "", ""},
+	{`BEGIN { OFMT = "%x"; print 1234.5678 }`, "", "4d2\n", "", ""},
+	{`BEGIN { OFMT = "abc"; print 1234.5678 }`, "", "abc\n", "", ""},
+	{`BEGIN { OFMT = "%c"; print 65 }`, "", "65\n", "", ""}, // integers don't use OFMT
+	// Unlike CONVFMT, an %s conversion in OFMT is fine: it converts using CONVFMT
+	{`BEGIN { OFMT = "%s"; print 1234.5678 }`, "", "1234.57\n", "", ""},
+	{`BEGIN { OFMT = "%s"; CONVFMT = "%d"; print 1234.5678 }`, "", "1234\n", "", ""},
 	// OFS and ORS are tested above
 	{`BEGIN { print RSTART, RLENGTH; RSTART=5; RLENGTH=42; print RSTART, RLENGTH; } `, "",
 		"0 0\n5 42\n", "", ""},
@@ -692,8 +738,6 @@ BEGIN {
 `, "", "1\n", "", ""},
 	{`BEGIN { print system("echo foo"); print system("echo bar") }  # !fuzz`,
 		"", "foo\n0\nbar\n0\n", "", ""},
-	{`BEGIN { print system(">&2 echo error") }  # !fuzz`,
-		"", "error\n0\n", "", ""},
 	{`BEGIN { print system("exit 42") }  # !fuzz !posix`, "", "42\n", "", ""},
 	{`BEGIN { system("cat") }`, "foo\nbar", "foo\nbar", "", ""},
 	{`BEGIN { print system("exec /bin/kill -9 $$") } # !awk !posix !windows`, "", "265\n", "", ""},
@@ -891,7 +935,6 @@ BEGIN { x[1]=3; f5(x); print x[1] }
 	{`BEGIN { "echo foo" | getline a[1]; print a[1] }`, "", "foo\n", "", ""},
 	{`BEGIN { "echo foo" | getline $1; print $1 }`, "", "foo\n", "", ""},
 	{`BEGIN { print "foo" |"sort"; print "bar" |"sort" }  # !fuzz`, "", "bar\nfoo\n", "", ""},
-	{`BEGIN { print "foo" |">&2 echo error" }  # !gawk !fuzz`, "", "error\n", "", ""},
 	{`BEGIN { "cat" | getline; print }  # !fuzz`, "bar", "bar\n", "", ""},
 	{`BEGIN { print getline x < "/no/such/file" }  # !fuzz`, "", "-1\n", "", ""},
 	{`BEGIN { print getline "z"; print $0 }`, "foo", "1z\nfoo\n", "", ""},
@@ -936,7 +979,6 @@ BEGIN { x[1]=3; f5(x); print x[1] }
 	print $0
 }`, "", "foo\nbar\n", "", ""},
 	{`BEGIN { print "x" | "cat"; close("cat"); print "y" }`, "", "x\ny\n", "", ""},
-	{`BEGIN { print 1 >"/dev/stderr"; print 2 }  # !windows-gawk`, "", "1\n2\n", "", ""},
 
 	// Ensure data returned by getline (in various forms) is treated as numeric string
 	{`BEGIN { getline; print($0==0) }`, "0.0", "1\n", "", ""},
@@ -1182,21 +1224,26 @@ func TestInterp(t *testing.T) {
 				if test.in != "" {
 					cmd.Stdin = strings.NewReader(test.in)
 				}
-				out, err := cmd.CombinedOutput()
+				// Only stdout is compared, so warnings on stderr (such as
+				// newer Gawk's "bad `CONVFMT' specification") don't matter.
+				var stdout, stderr bytes.Buffer
+				cmd.Stdout = &stdout
+				cmd.Stderr = &stderr
+				err := cmd.Run()
 				if err != nil {
 					if test.awkErr != "" {
-						if strings.Contains(string(out), test.awkErr) {
+						if strings.Contains(stderr.String(), test.awkErr) {
 							return
 						}
-						t.Fatalf("expected error %q, got:\n%s", test.awkErr, out)
+						t.Fatalf("expected error %q, got:\n%s", test.awkErr, stderr.String())
 					} else {
-						t.Fatalf("error running %s: %v:\n%s", awkExe, err, out)
+						t.Fatalf("error running %s: %v:\n%s", awkExe, err, stderr.String())
 					}
 				}
 				if test.awkErr != "" {
 					t.Fatalf(`expected error %q, got ""`, test.awkErr)
 				}
-				normalized := normalizeNewlines(string(out))
+				normalized := normalizeNewlines(stdout.String())
 				if normalized != test.out {
 					t.Fatalf("expected/got:\n%q\n%q", test.out, normalized)
 				}
@@ -1690,6 +1737,46 @@ func TestShellCommand(t *testing.T) {
 			func(config *interp.Config) {
 				config.ShellCommand = []string{"foobar3982"}
 			})
+	}
+}
+
+// TestStderrOutput tests programs that write to stderr as well as stdout
+// (interpTests compares stdout only, and testGoAWK merges the two streams).
+func TestStderrOutput(t *testing.T) {
+	tests := []struct {
+		name string
+		src  string
+		out  string
+		err  string
+	}{
+		{"system", `BEGIN { print system(">&2 echo error") }`, "0\n", "error\n"},
+		{"pipe", `BEGIN { print "foo" |">&2 echo error" }`, "", "error\n"},
+		{"redirect", `BEGIN { print 1 >"/dev/stderr"; print 2 }`, "2\n", "1\n"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if runtime.GOOS == "windows" {
+				t.Skip("skipping on Windows: these use Unix shell redirection")
+			}
+			prog, err := parser.ParseProgram([]byte(test.src), nil)
+			if err != nil {
+				t.Fatalf("error parsing: %v", err)
+			}
+			var outBuf, errBuf concurrentBuffer
+			_, err = interp.ExecProgram(prog, &interp.Config{
+				Output: &outBuf,
+				Error:  &errBuf,
+			})
+			if err != nil {
+				t.Fatalf("expected no error, got %v", err)
+			}
+			if got := normalizeNewlines(outBuf.String()); got != test.out {
+				t.Errorf("expected stdout %q, got %q", test.out, got)
+			}
+			if got := normalizeNewlines(errBuf.String()); got != test.err {
+				t.Errorf("expected stderr %q, got %q", test.err, got)
+			}
+		})
 	}
 }
 
@@ -2218,6 +2305,317 @@ func TestCSVMultiRead(t *testing.T) {
 				t.Fatalf("expected status 0, got %d", status)
 			}
 		})
+	}
+}
+
+func TestFileSystemReadOnly(t *testing.T) {
+	fsys := fstest.MapFS{
+		"file.txt": &fstest.MapFile{Data: []byte("read test\n")},
+	}
+
+	runProgram := func(source string) (output *bytes.Buffer, err error) {
+		prog, err := parser.ParseProgram([]byte(source), nil)
+		if err != nil {
+			t.Fatalf("error parsing: %v", err)
+		}
+		output = new(bytes.Buffer)
+		config := interp.Config{
+			Stdin:      strings.NewReader(""),
+			Output:     output,
+			Error:      io.Discard,
+			FileSystem: fsys,
+		}
+		status, err := interp.ExecProgram(prog, &config)
+		if status != 0 {
+			t.Fatalf("expected status 0, got %d", status)
+		}
+		return output, err
+	}
+
+	t.Run("cannot write", func(t *testing.T) {
+		output, err := runProgram(`BEGIN { print "foo" >"output.txt" }`)
+		const expectedErr = "filesystem is read-only"
+		if err == nil {
+			t.Fatalf("expected error contains %q, got <nil>", expectedErr)
+		} else if !strings.Contains(err.Error(), expectedErr) {
+			t.Fatalf("expected error contains %q, got %q", expectedErr, err.Error())
+		}
+		if output.Len() != 0 {
+			t.Fatalf("expected empty stdout, got %q", output.String())
+		}
+	})
+
+	t.Run("cannot append", func(t *testing.T) {
+		output, err := runProgram(`BEGIN { print "foo" >>"output.txt" }`)
+		const expectedErr = "filesystem is read-only"
+		if err == nil {
+			t.Fatalf("expected error contains %q, got <nil>", expectedErr)
+		} else if !strings.Contains(err.Error(), expectedErr) {
+			t.Fatalf("expected error contains %q, got %q", expectedErr, err.Error())
+		}
+		if output.Len() != 0 {
+			t.Fatalf("expected empty stdout, got %q", output.String())
+		}
+	})
+
+	t.Run("can read", func(t *testing.T) {
+		output, err := runProgram(`BEGIN { getline <"file.txt"; print $0 }`)
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		const expected = "read test\n"
+		normalized := normalizeNewlines(output.String())
+		if normalized != expected {
+			t.Fatalf("expected output %q, got %q", expected, normalized)
+		}
+	})
+
+	t.Run("file not found", func(t *testing.T) {
+		output, err := runProgram(`BEGIN { print(getline <"does_not_exist") }`)
+		if err != nil {
+			t.Fatalf("expected no error, got %v", err)
+		}
+		const expected = "-1\n"
+		normalized := normalizeNewlines(output.String())
+		if normalized != expected {
+			t.Fatalf("expected output %q, got %q", expected, normalized)
+		}
+	})
+}
+
+// memFS is a simple in-memory filesystem that implements [interp.WriteFS].
+type memFS struct {
+	fstest.MapFS
+}
+
+func (m memFS) Create(name string) (io.WriteCloser, error) {
+	file := &fstest.MapFile{}
+	m.MapFS[name] = file
+	return memFile{file}, nil
+}
+
+func (m memFS) Append(name string) (io.WriteCloser, error) {
+	file, ok := m.MapFS[name]
+	if !ok {
+		file = &fstest.MapFile{}
+		m.MapFS[name] = file
+	}
+	return memFile{file}, nil
+}
+
+type memFile struct {
+	file *fstest.MapFile
+}
+
+func (f memFile) Write(buf []byte) (int, error) {
+	f.file.Data = append(f.file.Data, buf...)
+	return len(buf), nil
+}
+
+func (f memFile) Close() error {
+	return nil
+}
+
+func TestFileSystemWrite(t *testing.T) {
+	fsys := memFS{fstest.MapFS{}}
+	source := `BEGIN {
+		print "one" >"out.txt"     # Create makes a new file
+		close("out.txt")
+		print "two" >>"out.txt"    # Append adds to the existing file
+		close("out.txt")
+		print "x" >"trunc.txt"
+		close("trunc.txt")
+		print "y" >"trunc.txt"     # Create truncates the existing file
+	}`
+	prog, err := parser.ParseProgram([]byte(source), nil)
+	if err != nil {
+		t.Fatalf("error parsing: %v", err)
+	}
+	config := interp.Config{
+		Stdin:      strings.NewReader(""),
+		Output:     io.Discard,
+		Error:      io.Discard,
+		FileSystem: fsys,
+	}
+	status, err := interp.ExecProgram(prog, &config)
+	if err != nil {
+		t.Fatalf("error executing: %v", err)
+	}
+	if status != 0 {
+		t.Fatalf("expected status 0, got %d", status)
+	}
+
+	tests := []struct {
+		name     string
+		expected string
+	}{
+		{"out.txt", "one\ntwo\n"},
+		{"trunc.txt", "y\n"},
+	}
+	for _, test := range tests {
+		data, err := fs.ReadFile(fsys, test.name)
+		if err != nil {
+			t.Fatalf("error reading %s: %v", test.name, err)
+		}
+		normalized := normalizeNewlines(string(data))
+		if normalized != test.expected {
+			t.Fatalf("expected %s content %q, got %q", test.name, test.expected, normalized)
+		}
+	}
+}
+
+func TestFileSystemArgs(t *testing.T) {
+	fsys := fstest.MapFS{
+		"one.txt": &fstest.MapFile{Data: []byte("first\nsecond\n")},
+		"two.txt": &fstest.MapFile{Data: []byte("third\n")},
+	}
+	prog, err := parser.ParseProgram([]byte(`{ print FILENAME, FNR, $0 }`), nil)
+	if err != nil {
+		t.Fatalf("error parsing: %v", err)
+	}
+	output := new(bytes.Buffer)
+	config := interp.Config{
+		Stdin:      strings.NewReader(""),
+		Output:     output,
+		Error:      io.Discard,
+		Args:       []string{"one.txt", "two.txt"},
+		FileSystem: fsys,
+	}
+	status, err := interp.ExecProgram(prog, &config)
+	if err != nil {
+		t.Fatalf("error executing: %v", err)
+	}
+	if status != 0 {
+		t.Fatalf("expected status 0, got %d", status)
+	}
+	expected := "one.txt 1 first\none.txt 2 second\ntwo.txt 1 third\n"
+	normalized := normalizeNewlines(output.String())
+	if normalized != expected {
+		t.Fatalf("expected output %q, got %q", expected, normalized)
+	}
+}
+
+// Write a file for tests, failing the test if there's an error.
+func writeFile(t *testing.T, path, contents string) {
+	t.Helper()
+	err := os.WriteFile(path, []byte(contents), 0o644)
+	if err != nil {
+		t.Fatalf("error writing %s: %v", path, err)
+	}
+}
+
+// Test that os.DirFS, the most obvious fs.FS implementation, works with
+// ordinary AWK filenames: those are cleaned to valid fs.FS paths where
+// possible, and getline returns -1 (rather than being a fatal error) for the
+// ones that can't be opened.
+func TestFileSystemDirFS(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, filepath.Join(dir, "data.txt"), "hello\n")
+	err := os.Mkdir(filepath.Join(dir, "sub"), 0o755)
+	if err != nil {
+		t.Fatalf("error creating sub directory: %v", err)
+	}
+
+	runProgram := func(t *testing.T, source string, args ...string) (string, error) {
+		prog, err := parser.ParseProgram([]byte(source), nil)
+		if err != nil {
+			t.Fatalf("error parsing: %v", err)
+		}
+		output := new(bytes.Buffer)
+		config := interp.Config{
+			Stdin:      strings.NewReader(""),
+			Output:     output,
+			Error:      io.Discard,
+			Args:       args,
+			FileSystem: os.DirFS(dir),
+		}
+		_, err = interp.ExecProgram(prog, &config)
+		return normalizeNewlines(output.String()), err
+	}
+
+	getlineTests := []struct {
+		name     string
+		expected string
+	}{
+		{"data.txt", "1 hello"},        // already a valid fs.FS path
+		{"./data.txt", "1 hello"},      // cleaned to "data.txt"
+		{"sub/../data.txt", "1 hello"}, // cleaned to "data.txt"
+		{"nonexistent.txt", "-1 "},     // valid path, but not there
+		{"../data.txt", "-1 "},         // outside the filesystem root
+		{"/data.txt", "-1 "},           // absolute paths aren't supported
+		{"", "-1 "},                    // cleaned to ".", which won't read as a file
+	}
+	for _, test := range getlineTests {
+		t.Run("getline "+test.name, func(t *testing.T) {
+			source := `BEGIN { print (getline line <FILE), line }`
+			output, err := runProgram(t, strings.Replace(source, "FILE", `"`+test.name+`"`, 1))
+			if err != nil {
+				t.Fatalf("error executing: %v", err)
+			}
+			expected := test.expected + "\n"
+			if output != expected {
+				t.Fatalf("expected output %q, got %q", expected, output)
+			}
+		})
+	}
+
+	t.Run("args", func(t *testing.T) {
+		output, err := runProgram(t, `{ print FILENAME, $0 }`, "./data.txt")
+		if err != nil {
+			t.Fatalf("error executing: %v", err)
+		}
+		expected := "./data.txt hello\n"
+		if output != expected {
+			t.Fatalf("expected output %q, got %q", expected, output)
+		}
+	})
+
+	t.Run("args error", func(t *testing.T) {
+		// Unlike getline, a file named in ARGV that can't be opened is fatal.
+		_, err := runProgram(t, `{ print }`, "../data.txt")
+		if err == nil {
+			t.Fatal("expected error, got <nil>")
+		}
+	})
+}
+
+// Test that getline returns -1 rather than being a fatal error when a file
+// exists but can't be opened, as other AWK implementations do.
+func TestGetlineUnopenableFile(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("file permissions work differently on Windows")
+	}
+	if os.Geteuid() == 0 {
+		t.Skip("running as root, which can read files with no permissions")
+	}
+	path := filepath.Join(t.TempDir(), "secret.txt")
+	writeFile(t, path, "secret\n")
+	err := os.Chmod(path, 0o000)
+	if err != nil {
+		t.Fatalf("error changing permissions: %v", err)
+	}
+
+	prog, err := parser.ParseProgram([]byte(`BEGIN { print (getline line <"`+path+`"), line }`), nil)
+	if err != nil {
+		t.Fatalf("error parsing: %v", err)
+	}
+	output := new(bytes.Buffer)
+	config := interp.Config{
+		Stdin:  strings.NewReader(""),
+		Output: output,
+		Error:  io.Discard,
+	}
+	status, err := interp.ExecProgram(prog, &config)
+	if err != nil {
+		t.Fatalf("error executing: %v", err)
+	}
+	if status != 0 {
+		t.Fatalf("expected status 0, got %d", status)
+	}
+	expected := "-1 \n"
+	normalized := normalizeNewlines(output.String())
+	if normalized != expected {
+		t.Fatalf("expected output %q, got %q", expected, normalized)
 	}
 }
 
