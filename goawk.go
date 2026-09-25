@@ -28,8 +28,10 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -47,7 +49,7 @@ import (
 )
 
 const (
-	version    = "v1.31.0"
+	version    = "v1.32.0"
 	copyright  = "GoAWK " + version + " - Copyright (c) 2022 Ben Hoyt"
 	shortUsage = "usage: goawk [-F fs] [-v var=value] [-f progfile | 'prog'] [file ...]"
 	longUsage  = `Standard AWK arguments:
@@ -454,8 +456,8 @@ func showSourceLine(src []byte, pos lexer.Position) {
 }
 
 func errorExit(err error) {
-	pathErr, ok := err.(*os.PathError)
-	if ok && os.IsNotExist(err) {
+	var pathErr *fs.PathError
+	if errors.As(err, &pathErr) && errors.Is(err, fs.ErrNotExist) {
 		errorExitf("file %q not found", pathErr.Path)
 	}
 	errorExitf("%s", err)
